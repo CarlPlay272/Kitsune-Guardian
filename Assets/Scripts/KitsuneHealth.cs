@@ -13,7 +13,7 @@ public class KitsuneHealth : MonoBehaviour
     [SerializeField] private bool restoreFullHealthOnRespawn = true;
 
     [Header("Daño por peligro")]
-    [SerializeField] private string deathTag = "Muerte";
+    [SerializeField] private string deathTag = "";
     [SerializeField] private float trapDamage = 999f;
 
     [Header("Debug")]
@@ -88,7 +88,7 @@ public class KitsuneHealth : MonoBehaviour
     {
         if (isDead) return;
 
-        if (other.CompareTag(deathTag))
+        if (!string.IsNullOrEmpty(deathTag) && other.CompareTag(deathTag))
         {
             TakeDamage(trapDamage);
         }
