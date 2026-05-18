@@ -3,11 +3,13 @@ using UnityEngine.UI;
 
 public class HealthBarUI : MonoBehaviour
 {
-    public Image fillImage;
-    public PlayerHealth playerHealth;
+    [SerializeField] private Image fillImage;
+    [SerializeField] private KitsuneHealth kitsuneHealth;
 
     void Update()
     {
-        fillImage.fillAmount = playerHealth.currentHealth / playerHealth.maxHealth;
+        if (fillImage == null || kitsuneHealth == null) return;
+
+        fillImage.fillAmount = kitsuneHealth.CurrentHealth / kitsuneHealth.MaxHealth;
     }
 }
