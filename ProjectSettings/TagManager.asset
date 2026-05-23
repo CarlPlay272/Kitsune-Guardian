@@ -10,13 +10,13 @@ TagManager:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Background
   - Water
   - UI
   - Ground
-  - 
-  - 
-  - 
+  - Particles
+  - Characters
+  - Foreground
   - 
   - 
   - 
@@ -42,6 +42,12 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Background
+    uniqueID: 2019026181
+    locked: 0
+  - name: Particles
+    uniqueID: 1890410583
     locked: 0
   - name: Characters
     uniqueID: 1122967323
