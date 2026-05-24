@@ -46,11 +46,20 @@ TagManager:
   - name: Background
     uniqueID: 2019026181
     locked: 0
-  - name: Particles
-    uniqueID: 1890410583
+  - name: Ground
+    uniqueID: 1610145721
     locked: 0
-  - name: Characters
+  - name: Decoracion
+    uniqueID: 3976629575
+    locked: 0
+  - name: Player
     uniqueID: 1122967323
+    locked: 0
+  - name: Foreground
+    uniqueID: 3717774417
+    locked: 0
+  - name: UI
+    uniqueID: 1890410583
     locked: 0
   m_RenderingLayers:
   - Default
