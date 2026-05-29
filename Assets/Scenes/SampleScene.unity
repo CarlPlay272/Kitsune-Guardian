@@ -4819,15 +4819,16 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 228831292}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -12.98213, y: 0.23129001, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1988428785}
   - {fileID: 1135931503}
   - {fileID: 1069267378}
-  m_Father: {fileID: 1571999379}
+  - {fileID: 1781894223}
+  m_Father: {fileID: 812336434}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &276122514
 GameObject:
@@ -6734,12 +6735,11 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1703492424}
-  - {fileID: 1623256485}
-  - {fileID: 1920330609}
   - {fileID: 875418609}
   - {fileID: 2059402862}
   - {fileID: 1117394854}
+  - {fileID: 1627001809}
+  - {fileID: 228831293}
   m_Father: {fileID: 952296614}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &815873163
@@ -7090,7 +7090,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 875418609}
-  - component: {fileID: 875418610}
   m_Layer: 0
   m_Name: arbol_fondo
   m_TagString: Untagged
@@ -7115,20 +7114,6 @@ Transform:
   - {fileID: 1135000310}
   m_Father: {fileID: 812336434}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &875418610
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 875418608}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1a40cee76703eb946a8af52f0eb4ba4b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ParallaxLoop
-  cam: {fileID: 519420032}
-  parallaxFactor: 0.15
 --- !u!1 &879332472
 GameObject:
   m_ObjectHideFlags: 0
@@ -8334,7 +8319,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1117394854}
-  - component: {fileID: 1117394855}
   m_Layer: 0
   m_Name: rocas_cerca
   m_TagString: Untagged
@@ -8350,7 +8334,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1117394853}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -8359,20 +8343,6 @@ Transform:
   - {fileID: 1247565636}
   m_Father: {fileID: 812336434}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1117394855
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1117394853}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1a40cee76703eb946a8af52f0eb4ba4b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ParallaxLoop
-  cam: {fileID: 519420032}
-  parallaxFactor: 0.07
 --- !u!1 &1135000309
 GameObject:
   m_ObjectHideFlags: 0
@@ -20285,7 +20255,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 42002223}
-  - {fileID: 228831293}
   m_Father: {fileID: 1413162485}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1597732246
@@ -20515,7 +20484,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1623256484}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -20524,7 +20493,7 @@ Transform:
   - {fileID: 582881098}
   - {fileID: 612629310}
   - {fileID: 689012881}
-  m_Father: {fileID: 812336434}
+  m_Father: {fileID: 1627001809}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1623256486
 MonoBehaviour:
@@ -20540,6 +20509,40 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ParallaxLoop
   cam: {fileID: 519420032}
   parallaxFactor: 0.1
+--- !u!1 &1627001808
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1627001809}
+  m_Layer: 0
+  m_Name: parallax
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1627001809
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1627001808}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1703492424}
+  - {fileID: 1623256485}
+  - {fileID: 1920330609}
+  m_Father: {fileID: 812336434}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1653785540
 GameObject:
   m_ObjectHideFlags: 0
@@ -20656,7 +20659,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1703492423}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -20665,7 +20668,7 @@ Transform:
   - {fileID: 276122515}
   - {fileID: 1653785541}
   - {fileID: 932293163}
-  m_Father: {fileID: 812336434}
+  m_Father: {fileID: 1627001809}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1703492425
 MonoBehaviour:
@@ -20855,7 +20858,7 @@ GameObject:
   - component: {fileID: 1781894223}
   - component: {fileID: 1781894224}
   m_Layer: 0
-  m_Name: 2tileset2 1
+  m_Name: arbusto
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -20870,11 +20873,11 @@ Transform:
   m_GameObject: {fileID: 1781894222}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 19.28, y: -1.19, z: 0}
+  m_LocalPosition: {x: 32.26213, y: -1.4212902, z: 0}
   m_LocalScale: {x: 9, y: 9, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 2059402862}
+  m_Father: {fileID: 228831293}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &1781894224
 SpriteRenderer:
@@ -20965,7 +20968,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1920330608}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -20974,7 +20977,7 @@ Transform:
   - {fileID: 971334394}
   - {fileID: 214778793}
   - {fileID: 1114211772}
-  m_Father: {fileID: 812336434}
+  m_Father: {fileID: 1627001809}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1920330610
 MonoBehaviour:
@@ -21611,7 +21614,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2059402862}
-  - component: {fileID: 2059402863}
   m_Layer: 0
   m_Name: arbol_cerca
   m_TagString: Untagged
@@ -21633,23 +21635,8 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1612962333}
-  - {fileID: 1781894223}
   m_Father: {fileID: 812336434}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2059402863
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2059402861}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1a40cee76703eb946a8af52f0eb4ba4b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ParallaxLoop
-  cam: {fileID: 519420032}
-  parallaxFactor: 0.07
 --- !u!1 &2062198729
 GameObject:
   m_ObjectHideFlags: 0
