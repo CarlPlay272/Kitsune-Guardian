@@ -488,7 +488,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::KitsuneController
   moveSpeed: 6
-  jumpForce: 14
+  jumpForce: 22
   groundCheck: {fileID: 1944211688}
   groundCheckRadius: 0.15
   groundLayer:

@@ -8,6 +8,7 @@ public class FireSpiritPremio : MonoBehaviour
 
     [Header("Premio")]
     [SerializeField] private int puntos = 1;
+    [SerializeField] private float curacionAlRecolectar = 25f;
 
     [Header("Recolección")]
     [SerializeField] private float tiempoAntesDeDesaparecer = 0.8f;
@@ -26,7 +27,6 @@ public class FireSpiritPremio : MonoBehaviour
     void Start()
     {
         posicionInicial = transform.position;
-
         audioSource = GetComponent<AudioSource>();
     }
 
@@ -47,16 +47,21 @@ public class FireSpiritPremio : MonoBehaviour
         if (kitsune == null) return;
         if (kitsune.IsDead) return;
 
-        Recolectar();
+        Recolectar(kitsune);
     }
 
-    private void Recolectar()
+    private void Recolectar(KitsuneHealth kitsune)
     {
         recolectado = true;
 
         if (GameController.Instance != null)
         {
             GameController.Instance.SumarPunto(puntos);
+        }
+
+        if (curacionAlRecolectar > 0f)
+        {
+            kitsune.Heal(curacionAlRecolectar);
         }
 
         if (animator != null)
