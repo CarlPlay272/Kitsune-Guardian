@@ -4,7 +4,14 @@ public class KitsuneController : MonoBehaviour
 {
     [Header("Movimiento")]
     [SerializeField] private float moveSpeed = 5f;
-    [SerializeField] private float jumpForce = 10f;
+    [SerializeField] private float jumpForce = 22f;
+
+    [Header("Agua")]
+    [SerializeField] private float waterMoveSpeed = 3.5f;
+    [SerializeField] private float waterJumpForce = 8f;
+    [SerializeField] private float normalGravityScale = 3f;
+    [SerializeField] private float waterGravityScale = 1f;
+    [SerializeField] private float maxFallSpeedInWater = -4f;
 
     [Header("Suelo")]
     [SerializeField] private Transform groundCheck;
@@ -18,6 +25,7 @@ public class KitsuneController : MonoBehaviour
     private float moveInput;
     private bool isGrounded;
     private bool facingRight = true;
+    private bool isInWater = false;
 
     void Awake()
     {
@@ -28,18 +36,36 @@ public class KitsuneController : MonoBehaviour
             animator = GetComponent<Animator>();
     }
 
+    void Start()
+    {
+        if (rb != null)
+        {
+            rb.gravityScale = normalGravityScale;
+        }
+    }
+
     void Update()
     {
         moveInput = Input.GetAxisRaw("Horizontal");
 
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
 
-        if (Input.GetButtonDown("Jump") && isGrounded)
+        if (Input.GetButtonDown("Jump"))
         {
-            rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+            if (isInWater)
+            {
+                rb.linearVelocity = new Vector2(rb.linearVelocity.x, waterJumpForce);
 
-            if (animator != null)
-                animator.SetTrigger("Jump");
+                if (animator != null)
+                    animator.SetTrigger("Jump");
+            }
+            else if (isGrounded)
+            {
+                rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+
+                if (animator != null)
+                    animator.SetTrigger("Jump");
+            }
         }
 
         if (moveInput > 0 && !facingRight)
@@ -56,7 +82,17 @@ public class KitsuneController : MonoBehaviour
 
     void FixedUpdate()
     {
-        rb.linearVelocity = new Vector2(moveInput * moveSpeed, rb.linearVelocity.y);
+        float currentSpeed = isInWater ? waterMoveSpeed : moveSpeed;
+
+        Vector2 velocity = rb.linearVelocity;
+        velocity.x = moveInput * currentSpeed;
+
+        if (isInWater && velocity.y < maxFallSpeedInWater)
+        {
+            velocity.y = maxFallSpeedInWater;
+        }
+
+        rb.linearVelocity = velocity;
     }
 
     void Flip()
@@ -66,6 +102,23 @@ public class KitsuneController : MonoBehaviour
         Vector3 localScale = transform.localScale;
         localScale.x *= -1;
         transform.localScale = localScale;
+    }
+
+    public void EnterWater()
+    {
+        isInWater = true;
+        rb.gravityScale = waterGravityScale;
+    }
+
+    public void ExitWater()
+    {
+        isInWater = false;
+        rb.gravityScale = normalGravityScale;
+    }
+
+    public bool IsInWater()
+    {
+        return isInWater;
     }
 
     private void OnDrawGizmosSelected()
