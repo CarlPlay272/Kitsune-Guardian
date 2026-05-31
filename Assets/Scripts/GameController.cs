@@ -20,6 +20,8 @@ public class GameController : MonoBehaviour
 
     [Header("Purificación")]
     [SerializeField] private GameObject contenedorCorrupcion;
+    [SerializeField] private GameObject humosSalto;
+    [SerializeField] private GameObject jumpPadTrigger;
     [SerializeField] private bool bosquePurificado = false;
 
     private int vidasActuales;
@@ -51,6 +53,30 @@ public class GameController : MonoBehaviour
         ActualizarUI();
     }
 
+    void Start()
+    {
+        // Apagado seguro en Start, cuando todos los objetos ya existen en escena
+        if (humosSalto != null)
+        {
+            humosSalto.SetActive(false);
+            Debug.Log("HumosSalto apagado al iniciar.");
+        }
+        else
+        {
+            Debug.LogWarning("GameController: humosSalto NO está asignado en el Inspector.");
+        }
+
+        if (jumpPadTrigger != null)
+        {
+            jumpPadTrigger.SetActive(false);
+            Debug.Log("JumpPadTrigger apagado al iniciar.");
+        }
+        else
+        {
+            Debug.LogWarning("GameController: jumpPadTrigger NO está asignado en el Inspector.");
+        }
+    }
+
     public void SumarPunto(int cantidad = 1)
     {
         puntosActuales += cantidad;
@@ -60,47 +86,48 @@ public class GameController : MonoBehaviour
     public void RestarVida(int cantidad = 1)
     {
         vidasActuales -= cantidad;
-
-        if (vidasActuales < 0)
-            vidasActuales = 0;
-
+        if (vidasActuales < 0) vidasActuales = 0;
         ActualizarUI();
-
-        if (vidasActuales <= 0)
-        {
-            ActivarGameOver();
-        }
+        if (vidasActuales <= 0) ActivarGameOver();
     }
 
     public void PurificarBosqueSagrado()
     {
         if (bosquePurificado) return;
-
         bosquePurificado = true;
 
         if (contenedorCorrupcion != null)
-        {
             contenedorCorrupcion.SetActive(false);
-            Debug.Log("¡El bosque ha sido purificado!");
+        else
+            Debug.LogWarning("GameController: contenedorCorrupcion no asignado.");
+
+        if (humosSalto != null)
+        {
+            humosSalto.SetActive(true);
+            Debug.Log("HumosSalto ACTIVADO.");
         }
         else
+            Debug.LogWarning("GameController: humosSalto no asignado al purificar.");
+
+        if (jumpPadTrigger != null)
         {
-            Debug.LogWarning("GameController: contenedorCorrupcion no asignado.");
+            jumpPadTrigger.SetActive(true);
+            Debug.Log("JumpPadTrigger ACTIVADO.");
         }
+        else
+            Debug.LogWarning("GameController: jumpPadTrigger no asignado al purificar.");
+
+        Debug.Log("¡Bosque purificado y plataforma de salto activada!");
     }
 
     private void ActualizarUI()
     {
-        if (vidasText != null)
-            vidasText.text = vidasActuales.ToString();
-
-        if (puntosText != null)
-            puntosText.text = puntosActuales.ToString();
+        if (vidasText != null) vidasText.text = vidasActuales.ToString();
+        if (puntosText != null) puntosText.text = puntosActuales.ToString();
     }
 
     private void ActivarGameOver()
     {
-        if (gameOverPanel != null)
-            gameOverPanel.SetActive(true);
+        if (gameOverPanel != null) gameOverPanel.SetActive(true);
     }
 }
