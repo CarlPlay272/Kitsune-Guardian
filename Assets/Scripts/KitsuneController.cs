@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class KitsuneController : MonoBehaviour
@@ -26,6 +27,7 @@ public class KitsuneController : MonoBehaviour
     private bool isGrounded;
     private bool facingRight = true;
     private bool isInWater = false;
+    private bool controlBloqueado = false;
 
     void Awake()
     {
@@ -46,11 +48,18 @@ public class KitsuneController : MonoBehaviour
 
     void Update()
     {
-        moveInput = Input.GetAxisRaw("Horizontal");
+        if (!controlBloqueado)
+        {
+            moveInput = Input.GetAxisRaw("Horizontal");
+        }
+        else
+        {
+            moveInput = 0f;
+        }
 
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
 
-        if (Input.GetButtonDown("Jump"))
+        if (!controlBloqueado && Input.GetButtonDown("Jump"))
         {
             if (isInWater)
             {
@@ -68,10 +77,13 @@ public class KitsuneController : MonoBehaviour
             }
         }
 
-        if (moveInput > 0 && !facingRight)
-            Flip();
-        else if (moveInput < 0 && facingRight)
-            Flip();
+        if (!controlBloqueado)
+        {
+            if (moveInput > 0 && !facingRight)
+                Flip();
+            else if (moveInput < 0 && facingRight)
+                Flip();
+        }
 
         if (animator != null)
         {
@@ -82,6 +94,8 @@ public class KitsuneController : MonoBehaviour
 
     void FixedUpdate()
     {
+        if (controlBloqueado) return;
+
         float currentSpeed = isInWater ? waterMoveSpeed : moveSpeed;
 
         Vector2 velocity = rb.linearVelocity;
@@ -119,6 +133,21 @@ public class KitsuneController : MonoBehaviour
     public bool IsInWater()
     {
         return isInWater;
+    }
+
+    public void AplicarKnockback(Vector2 fuerza, float duracionBloqueo)
+    {
+        StartCoroutine(KnockbackRutina(fuerza, duracionBloqueo));
+    }
+
+    private IEnumerator KnockbackRutina(Vector2 fuerza, float duracionBloqueo)
+    {
+        controlBloqueado = true;
+        rb.linearVelocity = fuerza;
+
+        yield return new WaitForSeconds(duracionBloqueo);
+
+        controlBloqueado = false;
     }
 
     private void OnDrawGizmosSelected()

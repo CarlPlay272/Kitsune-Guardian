@@ -24,6 +24,9 @@ public class GameController : MonoBehaviour
     [SerializeField] private GameObject jumpPadTrigger;
     [SerializeField] private bool bosquePurificado = false;
 
+    [Header("Llave del nivel")]
+    [SerializeField] private bool tieneLlave = false;
+
     private int vidasActuales;
     private int puntosActuales;
 
@@ -33,6 +36,7 @@ public class GameController : MonoBehaviour
     public int VidasActuales => vidasActuales;
     public int PuntosActuales => puntosActuales;
     public bool BosquePurificado => bosquePurificado;
+    public bool TieneLlave => tieneLlave;
 
     void Awake()
     {
@@ -55,7 +59,6 @@ public class GameController : MonoBehaviour
 
     void Start()
     {
-        // Apagado seguro en Start, cuando todos los objetos ya existen en escena
         if (humosSalto != null)
         {
             humosSalto.SetActive(false);
@@ -88,7 +91,9 @@ public class GameController : MonoBehaviour
         vidasActuales -= cantidad;
         if (vidasActuales < 0) vidasActuales = 0;
         ActualizarUI();
-        if (vidasActuales <= 0) ActivarGameOver();
+
+        if (vidasActuales <= 0)
+            ActivarGameOver();
     }
 
     public void PurificarBosqueSagrado()
@@ -120,14 +125,26 @@ public class GameController : MonoBehaviour
         Debug.Log("¡Bosque purificado y plataforma de salto activada!");
     }
 
+    public void ObtenerLlaveAzul()
+    {
+        if (tieneLlave) return;
+
+        tieneLlave = true;
+        Debug.Log("¡Llave azul obtenida!");
+    }
+
     private void ActualizarUI()
     {
-        if (vidasText != null) vidasText.text = vidasActuales.ToString();
-        if (puntosText != null) puntosText.text = puntosActuales.ToString();
+        if (vidasText != null)
+            vidasText.text = vidasActuales.ToString();
+
+        if (puntosText != null)
+            puntosText.text = puntosActuales.ToString();
     }
 
     private void ActivarGameOver()
     {
-        if (gameOverPanel != null) gameOverPanel.SetActive(true);
+        if (gameOverPanel != null)
+            gameOverPanel.SetActive(true);
     }
 }
