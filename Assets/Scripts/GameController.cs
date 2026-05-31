@@ -18,6 +18,10 @@ public class GameController : MonoBehaviour
     [Header("Estado")]
     [SerializeField] private int vidasIniciales = 3;
 
+    [Header("Purificación")]
+    [SerializeField] private GameObject contenedorCorrupcion;
+    [SerializeField] private bool bosquePurificado = false;
+
     private int vidasActuales;
     private int puntosActuales;
 
@@ -26,6 +30,7 @@ public class GameController : MonoBehaviour
     public float LimiteDerecho => limiteDerecho != null ? limiteDerecho.position.x : 0f;
     public int VidasActuales => vidasActuales;
     public int PuntosActuales => puntosActuales;
+    public bool BosquePurificado => bosquePurificado;
 
     void Awake()
     {
@@ -64,6 +69,23 @@ public class GameController : MonoBehaviour
         if (vidasActuales <= 0)
         {
             ActivarGameOver();
+        }
+    }
+
+    public void PurificarBosqueSagrado()
+    {
+        if (bosquePurificado) return;
+
+        bosquePurificado = true;
+
+        if (contenedorCorrupcion != null)
+        {
+            contenedorCorrupcion.SetActive(false);
+            Debug.Log("¡El bosque ha sido purificado!");
+        }
+        else
+        {
+            Debug.LogWarning("GameController: contenedorCorrupcion no asignado.");
         }
     }
 
