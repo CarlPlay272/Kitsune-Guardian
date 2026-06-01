@@ -24,6 +24,7 @@ public class KitsuneHealth : MonoBehaviour
     [SerializeField] private float debugStep = 10f;
 
     private bool isDead = false;
+    private Vector3 spawnPosition;
 
     public float MaxHealth => maxHealth;
     public float CurrentHealth => currentHealth;
@@ -32,7 +33,10 @@ public class KitsuneHealth : MonoBehaviour
     void Start()
     {
         currentHealth = maxHealth;
+        spawnPosition = transform.position;
+
         Debug.Log("KitsuneHealth cargado. Vida inicial: " + currentHealth);
+        Debug.Log("Punto de spawn inicial guardado en: " + spawnPosition);
     }
 
     void Update()
@@ -82,6 +86,7 @@ public class KitsuneHealth : MonoBehaviour
     public void RestoreFullHealth()
     {
         currentHealth = maxHealth;
+        Debug.Log("Vida restaurada al máximo: " + currentHealth);
     }
 
     private void OnTriggerEnter2D(Collider2D other)
@@ -114,12 +119,19 @@ public class KitsuneHealth : MonoBehaviour
         if (respawnPoint != null)
         {
             transform.position = respawnPoint.position;
+            Debug.Log("Respawn en respawnPoint asignado: " + respawnPoint.position);
+        }
+        else
+        {
+            transform.position = spawnPosition;
+            Debug.Log("Respawn en spawn inicial guardado: " + spawnPosition);
         }
 
         Rigidbody2D rb = GetComponent<Rigidbody2D>();
         if (rb != null)
         {
             rb.linearVelocity = Vector2.zero;
+            rb.angularVelocity = 0f;
         }
 
         if (restoreFullHealthOnRespawn)
@@ -128,5 +140,6 @@ public class KitsuneHealth : MonoBehaviour
         }
 
         isDead = false;
+        Debug.Log("Kitsune reapareció correctamente.");
     }
 }
