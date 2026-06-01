@@ -15,14 +15,25 @@ public class GameController : MonoBehaviour
     [SerializeField] private TMP_Text puntosText;
     [SerializeField] private GameObject gameOverPanel;
 
+    [Header("HUD Colas")]
+    [SerializeField] private GameObject colaHUD1; // ñes/HUD/TailIcons/ColaHUD_01_Invisibilidad
+    [SerializeField] private GameObject colaHUD2; // ñes/HUD/TailIcons/ColaHUD_02_Dash
+
     [Header("Estado")]
     [SerializeField] private int vidasIniciales = 3;
 
     [Header("Purificación")]
     [SerializeField] private GameObject contenedorCorrupcion;
+    [SerializeField] private bool bosquePurificado = false;
+
+    [Header("Plataforma de salto")]
     [SerializeField] private GameObject humosSalto;
     [SerializeField] private GameObject jumpPadTrigger;
-    [SerializeField] private bool bosquePurificado = false;
+    [SerializeField] private bool plataformaSaltoActiva = false;
+
+    [Header("Poderes")]
+    [SerializeField] private bool invisibilidadDesbloqueada = false;
+    [SerializeField] private bool dashDesbloqueado = false;
 
     [Header("Llave del nivel")]
     [SerializeField] private bool tieneLlave = false;
@@ -37,6 +48,9 @@ public class GameController : MonoBehaviour
     public int PuntosActuales => puntosActuales;
     public bool BosquePurificado => bosquePurificado;
     public bool TieneLlave => tieneLlave;
+    public bool InvisibilidadDesbloqueada => invisibilidadDesbloqueada;
+    public bool DashDesbloqueado => dashDesbloqueado;
+    public bool PlataformaSaltoActiva => plataformaSaltoActiva;
 
     void Awake()
     {
@@ -60,24 +74,20 @@ public class GameController : MonoBehaviour
     void Start()
     {
         if (humosSalto != null)
-        {
-            humosSalto.SetActive(false);
-            Debug.Log("HumosSalto apagado al iniciar.");
-        }
-        else
-        {
-            Debug.LogWarning("GameController: humosSalto NO está asignado en el Inspector.");
-        }
+            humosSalto.SetActive(plataformaSaltoActiva);
 
         if (jumpPadTrigger != null)
-        {
-            jumpPadTrigger.SetActive(false);
-            Debug.Log("JumpPadTrigger apagado al iniciar.");
-        }
+            jumpPadTrigger.SetActive(plataformaSaltoActiva);
+
+        if (colaHUD1 != null)
+            colaHUD1.SetActive(invisibilidadDesbloqueada);
         else
-        {
-            Debug.LogWarning("GameController: jumpPadTrigger NO está asignado en el Inspector.");
-        }
+            Debug.LogWarning("GameController: colaHUD1 no asignada (TailIcons/ColaHUD_01_Invisibilidad).");
+
+        if (colaHUD2 != null)
+            colaHUD2.SetActive(dashDesbloqueado);
+        else
+            Debug.LogWarning("GameController: colaHUD2 no asignada (TailIcons/ColaHUD_02_Dash).");
     }
 
     public void SumarPunto(int cantidad = 1)
@@ -90,15 +100,55 @@ public class GameController : MonoBehaviour
     {
         vidasActuales -= cantidad;
         if (vidasActuales < 0) vidasActuales = 0;
+
         ActualizarUI();
 
         if (vidasActuales <= 0)
             ActivarGameOver();
     }
 
+    public void DesbloquearInvisibilidad()
+    {
+        if (invisibilidadDesbloqueada) return;
+
+        invisibilidadDesbloqueada = true;
+
+        if (colaHUD1 != null)
+        {
+            colaHUD1.SetActive(true);
+            Debug.Log("ColaHUD_01_Invisibilidad activada.");
+        }
+        else
+        {
+            Debug.LogWarning("GameController: colaHUD1 no asignada.");
+        }
+
+        Debug.Log("¡Invisibilidad desbloqueada!");
+    }
+
+    public void DesbloquearDash()
+    {
+        if (dashDesbloqueado) return;
+
+        dashDesbloqueado = true;
+
+        if (colaHUD2 != null)
+        {
+            colaHUD2.SetActive(true);
+            Debug.Log("ColaHUD_02_Dash activada.");
+        }
+        else
+        {
+            Debug.LogWarning("GameController: colaHUD2 no asignada.");
+        }
+
+        Debug.Log("¡Dash desbloqueado!");
+    }
+
     public void PurificarBosqueSagrado()
     {
         if (bosquePurificado) return;
+
         bosquePurificado = true;
 
         if (contenedorCorrupcion != null)
@@ -106,23 +156,28 @@ public class GameController : MonoBehaviour
         else
             Debug.LogWarning("GameController: contenedorCorrupcion no asignado.");
 
+        DesbloquearDash();
+
+        Debug.Log("¡Bosque purificado y dash desbloqueado!");
+    }
+
+    public void ActivarPlataformaSalto()
+    {
+        if (plataformaSaltoActiva) return;
+
+        plataformaSaltoActiva = true;
+
         if (humosSalto != null)
-        {
             humosSalto.SetActive(true);
-            Debug.Log("HumosSalto ACTIVADO.");
-        }
         else
-            Debug.LogWarning("GameController: humosSalto no asignado al purificar.");
+            Debug.LogWarning("GameController: humosSalto no asignado.");
 
         if (jumpPadTrigger != null)
-        {
             jumpPadTrigger.SetActive(true);
-            Debug.Log("JumpPadTrigger ACTIVADO.");
-        }
         else
-            Debug.LogWarning("GameController: jumpPadTrigger no asignado al purificar.");
+            Debug.LogWarning("GameController: jumpPadTrigger no asignado.");
 
-        Debug.Log("¡Bosque purificado y plataforma de salto activada!");
+        Debug.Log("¡Tengu derrotado! Plataforma de salto activada.");
     }
 
     public void ObtenerLlaveAzul()

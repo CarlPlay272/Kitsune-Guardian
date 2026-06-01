@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Suelo
   - Muerte
+  - Enemy
   layers:
   - Default
   - TransparentFX
@@ -54,6 +55,9 @@ TagManager:
     locked: 0
   - name: Decoracion
     uniqueID: 3976629575
+    locked: 0
+  - name: 'Enemies '
+    uniqueID: 929653177
     locked: 0
   - name: Player
     uniqueID: 1122967323
