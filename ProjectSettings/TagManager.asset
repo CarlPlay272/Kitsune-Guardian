@@ -49,6 +49,9 @@ TagManager:
   - name: Ground
     uniqueID: 1610145721
     locked: 0
+  - name: Collectibles
+    uniqueID: 2436702891
+    locked: 0
   - name: Decoracion
     uniqueID: 3976629575
     locked: 0
