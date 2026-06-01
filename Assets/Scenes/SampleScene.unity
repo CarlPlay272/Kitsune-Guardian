@@ -6046,7 +6046,7 @@ GameObject:
   - component: {fileID: 323428418}
   - component: {fileID: 323428417}
   m_Layer: 6
-  m_Name: Shi
+  m_Name: No
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
