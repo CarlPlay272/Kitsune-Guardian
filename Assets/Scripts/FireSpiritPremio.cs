@@ -10,6 +10,9 @@ public class FireSpiritPremio : MonoBehaviour
     [SerializeField] private int puntos = 1;
     [SerializeField] private float curacionAlRecolectar = 25f;
 
+    // NUEVO
+    [SerializeField] private float energiaOtorgada = 10f;
+
     [Header("Recolección")]
     [SerializeField] private float tiempoAntesDeDesaparecer = 0.8f;
 
@@ -34,8 +37,14 @@ public class FireSpiritPremio : MonoBehaviour
     {
         if (!recolectado)
         {
-            float nuevaY = posicionInicial.y + Mathf.Sin(Time.time * flotacionVelocidad) * flotacionAmplitud;
-            transform.position = new Vector3(posicionInicial.x, nuevaY, posicionInicial.z);
+            float nuevaY = posicionInicial.y +
+                Mathf.Sin(Time.time * flotacionVelocidad) * flotacionAmplitud;
+
+            transform.position = new Vector3(
+                posicionInicial.x,
+                nuevaY,
+                posicionInicial.z
+            );
         }
     }
 
@@ -43,7 +52,9 @@ public class FireSpiritPremio : MonoBehaviour
     {
         if (recolectado) return;
 
-        KitsuneHealth kitsune = other.GetComponentInParent<KitsuneHealth>();
+        KitsuneHealth kitsune =
+            other.GetComponentInParent<KitsuneHealth>();
+
         if (kitsune == null) return;
         if (kitsune.IsDead) return;
 
@@ -64,19 +75,35 @@ public class FireSpiritPremio : MonoBehaviour
             kitsune.Heal(curacionAlRecolectar);
         }
 
+        // NUEVO: agregar energía espiritual
+        KitsuneSpirit spirit =
+            kitsune.GetComponent<KitsuneSpirit>();
+
+        if (spirit != null)
+        {
+            spirit.AddSpirit(energiaOtorgada);
+        }
+
         if (animator != null)
         {
             animator.SetTrigger("Collected");
         }
 
-        if (sonidoRecoleccion != null && audioSource != null)
+        if (sonidoRecoleccion != null &&
+            audioSource != null)
         {
-            audioSource.PlayOneShot(sonidoRecoleccion);
+            audioSource.PlayOneShot(
+                sonidoRecoleccion
+            );
         }
 
         GetComponent<Collider2D>().enabled = false;
 
-        StartCoroutine(DesaparecerDespues(tiempoAntesDeDesaparecer));
+        StartCoroutine(
+            DesaparecerDespues(
+                tiempoAntesDeDesaparecer
+            )
+        );
     }
 
     private IEnumerator DesaparecerDespues(float tiempo)
