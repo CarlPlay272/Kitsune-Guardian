@@ -16,10 +16,9 @@ public class KitsuneHealth : MonoBehaviour
     [SerializeField] private string deathTag = "";
     [SerializeField] private float trapDamage = 999f;
 
-    [Header("Debug")]
+    [Header("Debug y Atrapado (GEMINI)")]
     [SerializeField] private bool debugHealthKeysEnabled = false;
-    // NUEVO: Variable expuesta en Inspector para la tecla de auto-muerte/atrapado
-    [SerializeField] private KeyCode autoMuerteKey = KeyCode.R;
+    [SerializeField] private KeyCode autoMuerteKey = KeyCode.R; // Tecla para cuando el zorrito se quede atascado
     [SerializeField] private KeyCode toggleDebugKey = KeyCode.F3;
     [SerializeField] private KeyCode damageKey = KeyCode.J;
     [SerializeField] private KeyCode healKey = KeyCode.K;
@@ -59,10 +58,10 @@ public class KitsuneHealth : MonoBehaviour
             Heal(debugStep);
         }
 
-        // NUEVO: Detección de la tecla R para forzar reaparición si se queda atascado
+        // NUEVO: Mecánica de auto-muerte para salir de atascos mecánicos en los Tilesets
         if (Input.GetKeyDown(autoMuerteKey) && !isDead)
         {
-            Debug.Log("Kitsune atrapado en el mapa. Forzando auto-respawn espiritual con la tecla: " + autoMuerteKey);
+            Debug.Log("Kitsune atascado. Ejecutando botón de pánico espiritual con la tecla: " + autoMuerteKey);
             StartCoroutine(RespawnRoutine());
         }
     }
@@ -125,7 +124,13 @@ public class KitsuneHealth : MonoBehaviour
             yield break;
         }
 
-        if (respawnPoint != null)
+        // MODIFICACIÓN CRUCIAL: Sincronización directa con el ID de checkpoint activo del GameController
+        if (GameController.Instance != null)
+        {
+            transform.position = GameController.Instance.PuntoRetornoActual;
+            Debug.Log("Respawn exitoso en Checkpoint ID actual: " + GameController.Instance.CheckpointActualID + " | Posición: " + transform.position);
+        }
+        else if (respawnPoint != null)
         {
             transform.position = respawnPoint.position;
             Debug.Log("Respawn en respawnPoint asignado: " + respawnPoint.position);
