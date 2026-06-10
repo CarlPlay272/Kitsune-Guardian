@@ -18,6 +18,8 @@ public class KitsuneHealth : MonoBehaviour
 
     [Header("Debug")]
     [SerializeField] private bool debugHealthKeysEnabled = false;
+    // NUEVO: Variable expuesta en Inspector para la tecla de auto-muerte/atrapado
+    [SerializeField] private KeyCode autoMuerteKey = KeyCode.R;
     [SerializeField] private KeyCode toggleDebugKey = KeyCode.F3;
     [SerializeField] private KeyCode damageKey = KeyCode.J;
     [SerializeField] private KeyCode healKey = KeyCode.K;
@@ -55,6 +57,13 @@ public class KitsuneHealth : MonoBehaviour
         if (debugHealthKeysEnabled && Input.GetKeyDown(healKey))
         {
             Heal(debugStep);
+        }
+
+        // NUEVO: Detección de la tecla R para forzar reaparición si se queda atascado
+        if (Input.GetKeyDown(autoMuerteKey) && !isDead)
+        {
+            Debug.Log("Kitsune atrapado en el mapa. Forzando auto-respawn espiritual con la tecla: " + autoMuerteKey);
+            StartCoroutine(RespawnRoutine());
         }
     }
 
