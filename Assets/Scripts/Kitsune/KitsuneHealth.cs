@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement; // OBLIGATORIO: Para poder recargar el nivel completo
 
 public class KitsuneHealth : MonoBehaviour
 {
@@ -18,14 +19,19 @@ public class KitsuneHealth : MonoBehaviour
 
     [Header("Debug y Atrapado (GEMINI)")]
     [SerializeField] private bool debugHealthKeysEnabled = false;
-    [SerializeField] private KeyCode autoMuerteKey = KeyCode.R; // Tecla para cuando el zorrito se quede atascado
+    [SerializeField] private KeyCode autoMuerteKey = KeyCode.R;
     [SerializeField] private KeyCode toggleDebugKey = KeyCode.F3;
     [SerializeField] private KeyCode damageKey = KeyCode.J;
     [SerializeField] private KeyCode healKey = KeyCode.K;
     [SerializeField] private float debugStep = 10f;
 
+    [Header("Configuración de Reinicio Total")]
+    [Tooltip("Tiempo en segundos que se debe mantener presionada la R para reiniciar todo el nivel de cero.")]
+    [SerializeField] private float tiempoParaReiniciarNivel = 2.0f;
+
     private bool isDead = false;
     private Vector3 spawnPosition;
+    private float temporizadorR = 0f; // Mide cuánto tiempo se mantiene presionada la tecla R
 
     public float MaxHealth => maxHealth;
     public float CurrentHealth => currentHealth;
@@ -58,12 +64,45 @@ public class KitsuneHealth : MonoBehaviour
             Heal(debugStep);
         }
 
-        // NUEVO: Mecánica de auto-muerte para salir de atascos mecánicos en los Tilesets
-        if (Input.GetKeyDown(autoMuerteKey) && !isDead)
+        // LÓGICA DE REINICIO HÍBRIDA (PULSAR VS MANTENER R)
+        if (!isDead)
         {
-            Debug.Log("Kitsune atascado. Ejecutando botón de pánico espiritual con la tecla: " + autoMuerteKey);
-            StartCoroutine(RespawnRoutine());
+            // Mientras la tecla R se mantenga apretada...
+            if (Input.GetKey(autoMuerteKey))
+            {
+                temporizadorR += Time.deltaTime;
+
+                // Si superó el tiempo límite establecido, se gatilla el reinicio absoluto
+                if (temporizadorR >= tiempoParaReiniciarNivel)
+                {
+                    Debug.Log("Tecla " + autoMuerteKey + " mantenida por " + tiempoParaReiniciarNivel + "s. ¡Reiniciando nivel desde cero de forma absoluta!");
+                    ReiniciarNivelCompleto();
+                }
+            }
+
+            // En el instante que el jugador SUELTA la tecla R...
+            if (Input.GetKeyUp(autoMuerteKey))
+            {
+                // Si la soltó rápido (menos del tiempo límite), se interpreta como el suicidio normal
+                if (temporizadorR < tiempoParaReiniciarNivel && temporizadorR > 0.05f)
+                {
+                    Debug.Log("Kitsune atascado. Ejecutando botón de pánico espiritual rápido con la tecla: " + autoMuerteKey);
+                    StartCoroutine(RespawnRoutine());
+                }
+
+                // Resetear el acumulador obligatoriamente al soltar la tecla
+                temporizadorR = 0f;
+            }
         }
+    }
+
+    private void ReiniciarNivelCompleto()
+    {
+        // Obtener el nombre de la escena que se está jugando actualmente (ej: "SampleScene")
+        string nombreEscenaActual = SceneManager.GetActiveScene().name;
+
+        // Cargar de nuevo la escena limpia, reseteando memoria, enemigos, llaves, checkpoints y powerups
+        SceneManager.LoadScene(nombreEscenaActual);
     }
 
     public void TakeDamage(float damage)
@@ -110,6 +149,7 @@ public class KitsuneHealth : MonoBehaviour
     private IEnumerator RespawnRoutine()
     {
         isDead = true;
+        temporizadorR = 0f; // Evitar cualquier conflicto con el contador al morir
 
         if (GameController.Instance != null)
         {
@@ -124,7 +164,6 @@ public class KitsuneHealth : MonoBehaviour
             yield break;
         }
 
-        // MODIFICACIÓN CRUCIAL: Sincronización directa con el ID de checkpoint activo del GameController
         if (GameController.Instance != null)
         {
             transform.position = GameController.Instance.PuntoRetornoActual;
