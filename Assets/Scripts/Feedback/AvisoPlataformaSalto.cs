@@ -2,55 +2,63 @@ using System.Collections;
 using UnityEngine;
 using TMPro;
 
-public class AvisoTenguCondicional : MonoBehaviour
+public class AvisoPlataformaSalto : MonoBehaviour
 {
-    // NUEVO: Permite que otros scripts sepan si el jugador ya llegó hasta aquí
-    public static bool VistoAlTengu { get; private set; } = false;
-
-    [Header("Textos del Lore")]
+    [Header("Textos de las 3 Fases")]
     [TextArea(2, 5)]
-    [SerializeField] private string textoConInvisibilidad = "Ese es el gran Tengu... Siento que si activo mi Invisibilidad (Teclado: Q) podré colarme por su espalda sin que note mi presencia.";
+    [SerializeField] private string textoFase1Caida = "El salto de regreso es imposible desde aquí... y esta extraña plataforma no parece reaccionar a mi presencia. Tendré que explorar el fondo de esta fosa para encontrar una salida.";
     [TextArea(2, 5)]
-    [SerializeField] private string textoSinInvisibilidad = "¡Un momento! Ese demonio es invencible en mi estado actual... Siento que la corrupción me destruirá si me acerco. No debí bajar corriendo. (Mantén presionada R para reiniciar el nivel).";
+    [SerializeField] private string textoFase2Bucle = "La plataforma sigue apagada... Ese guardián corrupto de adelante debe ser la clave para reactivar la esencia de este lugar.";
+    [TextArea(2, 5)]
+    [SerializeField] private string textoFase3Activa = "Siento cómo el poder del bosque reactivó este mecanismo espiritual. Ahora que está en funcionamiento, podré volver a las plataformas superiores.";
 
     [Header("Configuración")]
-    [SerializeField] private float tiempoVisible = 4.5f;
+    [SerializeField] private float tiempoVisible = 5.0f;
     [SerializeField] private float velocidadFade = 2f;
     [SerializeField] private TextMeshPro textMeshPro;
 
     private Coroutine coroutineActual;
     private bool jugadorAdentro = false;
+    private bool fase1Mostrada = false;
 
     void Start()
     {
-        // Al reiniciar el nivel de cero, reseteamos la variable global obligatoriamente
-        VistoAlTengu = false;
         if (textMeshPro == null) textMeshPro = GetComponentInChildren<TextMeshPro>();
         if (textMeshPro != null) DefinirAlpha(0f);
+        fase1Mostrada = false;
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (GameController.Instance != null && GameController.Instance.BosquePurificado)
-        {
-            return;
-        }
-
         KitsuneHealth jugador = other.GetComponentInParent<KitsuneHealth>();
         if (jugador == null || jugador.IsDead) return;
 
         if (!jugadorAdentro)
         {
             jugadorAdentro = true;
-            VistoAlTengu = true; // ¡REGISTRO! El jugador ya descubrió al Tengu
 
-            if (GameController.Instance != null && GameController.Instance.InvisibilidadDesbloqueada)
+            // EVALUACIÓN DE LAS 3 FASES EN ORDEN CRONOLÓGICO
+            if (GameController.Instance != null && GameController.Instance.PlataformaSaltoActiva)
             {
-                textMeshPro.text = textoConInvisibilidad;
+                // FASE 3: El Tengu murió y la plataforma se encendió
+                textMeshPro.text = textoFase3Activa;
+            }
+            else if (AvisoTenguCondicional.VistoAlTengu)
+            {
+                // FASE 2: La plataforma está apagada pero ya fuiste a mirar al jefe (Línea Amarilla)
+                textMeshPro.text = textoFase2Bucle;
             }
             else
             {
-                textMeshPro.text = textoSinInvisibilidad;
+                // FASE 1: Es la primera vez que caes y no has visto al jefe (Línea Roja)
+                if (fase1Mostrada)
+                {
+                    jugadorAdentro = false; // Permitir que se libere si vuelve a pisarlo en Fase 1 sin avanzar
+                    return;
+                }
+
+                textMeshPro.text = textoFase1Caida;
+                fase1Mostrada = true; // Se marca para aparecer una sola vez en Fase 1
             }
 
             if (coroutineActual != null) StopCoroutine(coroutineActual);
@@ -66,8 +74,13 @@ public class AvisoTenguCondicional : MonoBehaviour
         if (jugadorAdentro)
         {
             jugadorAdentro = false;
-            if (coroutineActual != null) StopCoroutine(coroutineActual);
-            coroutineActual = StartCoroutine(OcultarTextoRoutine(0f));
+
+            // Si es la Fase 2 o 3, hacemos que se desvanezca al alejarse para que funcione siempre
+            if (GameController.Instance != null && (GameController.Instance.PlataformaSaltoActiva || AvisoTenguCondicional.VistoAlTengu))
+            {
+                if (coroutineActual != null) StopCoroutine(coroutineActual);
+                coroutineActual = StartCoroutine(OcultarTextoRoutine(0f)); // Fade out rápido al salir
+            }
         }
     }
 
