@@ -40,7 +40,7 @@ public class TenguAI : MonoBehaviour
     [SerializeField] private float combatHeightOffset = -0.55f;
 
     [Header("Persecución")]
-    [SerializeField] private float stopChaseDistance = 1.3f;
+    [SerializeField] private float stopChaseDistance = 2f;
     [SerializeField] private float maxChaseDistanceFromOrigin = 10f;
 
     [Header("Ataque")]
@@ -50,8 +50,7 @@ public class TenguAI : MonoBehaviour
     [SerializeField] private float arribaDamage = 55f;
     [SerializeField] private float attackCooldown = 0.45f;
     [SerializeField] private float attackStopTime = 0.22f;
-    [SerializeField] private float frontalMeleeLockDistance = 1.45f;
-
+    [SerializeField] private float frontalMeleeLockDistance = 2f;
     [Header("Debug")]
     [SerializeField] private bool debugLogs = true;
 
@@ -317,19 +316,34 @@ public class TenguAI : MonoBehaviour
         if (DebeBloquearseParaAtacar())
         {
             currentMoveSpeed = 0f;
+            rb.linearVelocity = Vector2.zero;
+
             ActualizarAnimacion(0f, true);
             return;
         }
 
-        movementTarget = new Vector2(player.position.x, rb.position.y);
+        float desiredDistance = frontalMeleeLockDistance - 0.2f;
+
+        float targetX;
+
+        if (player.position.x > transform.position.x)
+            targetX = player.position.x - desiredDistance;
+        else
+            targetX = player.position.x + desiredDistance;
+
+        movementTarget = new Vector2(targetX, rb.position.y);
+
         FlipTowards(player.position);
+
         currentMoveSpeed = chaseSpeed;
+
         ActualizarAnimacion(chaseSpeed, true);
     }
 
     void PrepararAtaque()
     {
         currentMoveSpeed = 0f;
+        rb.linearVelocity = Vector2.zero;
         FlipTowards(player.position);
         ActualizarAnimacion(0f, true);
 
@@ -452,7 +466,7 @@ public class TenguAI : MonoBehaviour
         float dx = Mathf.Abs(player.position.x - transform.position.x);
         float dy = Mathf.Abs(player.position.y - AlturaCombateTengu());
 
-        bool cercaHorizontal = dx <= 1.35f;
+        bool cercaHorizontal = dx <= frontalMeleeLockDistance;
         bool cercaVertical = dy <= 0.95f;
 
         return cercaHorizontal && cercaVertical;

@@ -32,7 +32,8 @@ public class TenguState : MonoBehaviour
 
     public void TakeHit(int damage = 1)
     {
-        if (isDead) return;
+        if (isDead)
+            return;
 
         currentHealth -= damage;
 
@@ -42,24 +43,41 @@ public class TenguState : MonoBehaviour
         {
             Die();
         }
+        else
+        {
+            if (animator != null)
+            {
+                Debug.Log("ACTIVANDO HURT");
+                animator.SetTrigger("Hurt");
+            }
+        }
     }
 
-    public void Die()
+    private void Die()
     {
-        if (isDead) return;
+        if (isDead)
+            return;
 
         isDead = true;
 
         if (animator != null)
-            animator.SetTrigger("Die");
+        {
+            animator.SetTrigger("Death");
+        }
 
         if (rb != null)
+        {
             rb.linearVelocity = Vector2.zero;
+            rb.angularVelocity = 0f;
+            rb.simulated = false;
+        }
 
         foreach (Collider2D col in collidersToDisable)
         {
             if (col != null)
+            {
                 col.enabled = false;
+            }
         }
 
         if (GameController.Instance != null)
@@ -69,5 +87,10 @@ public class TenguState : MonoBehaviour
         }
 
         Debug.Log("Tengu derrotado");
+    }
+
+    public void DestroyEnemy()
+    {
+        Destroy(gameObject);
     }
 }
