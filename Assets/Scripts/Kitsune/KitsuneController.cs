@@ -417,16 +417,9 @@ public class KitsuneController : MonoBehaviour
     {
         controlBloqueado = true;
 
-        moveInput = 0f;
-
         if (rb != null)
         {
-            rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
-        }
-
-        if (animator != null)
-        {
-            animator.SetFloat("Speed", 0f);
+            rb.linearVelocity = Vector2.zero;
         }
     }
 
@@ -434,4 +427,5 @@ public class KitsuneController : MonoBehaviour
     {
         controlBloqueado = false;
     }
+
 }

@@ -82,7 +82,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 5
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 4723107735738678597, guid: 8d5da0ed21d704841984b6966ad158ce, type: 3}
+  m_Sprite: {fileID: 34503516309603475, guid: 66efe2cba64049343a5122ba5c6a8e33, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -196,9 +196,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 67391f1f923a9bd4888249b7a2c2964c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FireSpiritPremio
-  animator: {fileID: 4909734885292644361}
+  graphics: {fileID: 0}
+  spriteRenderer: {fileID: 0}
   puntos: 1
-  tiempoAntesDeDesaparecer: 0.8
+  curacionAlRecolectar: 25
+  energiaOtorgada: 10
+  duracionEfecto: 0.5
+  alturaSubida: 0.5
   flotacionAmplitud: 0.15
   flotacionVelocidad: 2
   sonidoRecoleccion: {fileID: 0}

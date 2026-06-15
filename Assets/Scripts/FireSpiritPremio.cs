@@ -4,17 +4,17 @@ using UnityEngine;
 public class FireSpiritPremio : MonoBehaviour
 {
     [Header("Referencias")]
-    public Animator animator;
+    [SerializeField] private Transform graphics;
+    [SerializeField] private SpriteRenderer spriteRenderer;
 
     [Header("Premio")]
     [SerializeField] private int puntos = 1;
     [SerializeField] private float curacionAlRecolectar = 25f;
-
-    // NUEVO
     [SerializeField] private float energiaOtorgada = 10f;
 
-    [Header("Recolección")]
-    [SerializeField] private float tiempoAntesDeDesaparecer = 0.8f;
+    [Header("Efecto de recolección")]
+    [SerializeField] private float duracionEfecto = 0.5f;
+    [SerializeField] private float alturaSubida = 0.5f;
 
     [Header("Flotación")]
     [SerializeField] private float flotacionAmplitud = 0.15f;
@@ -22,41 +22,73 @@ public class FireSpiritPremio : MonoBehaviour
 
     [Header("Audio")]
     [SerializeField] private AudioClip sonidoRecoleccion;
+
     private AudioSource audioSource;
+    private Collider2D colliderPremio;
 
     private bool recolectado = false;
-    private Vector3 posicionInicial;
 
-    void Start()
+    private Vector3 posicionInicial;
+    private Vector3 posicionInicialGraphics;
+
+    private void Start()
     {
         posicionInicial = transform.position;
+
         audioSource = GetComponent<AudioSource>();
+        colliderPremio = GetComponent<Collider2D>();
+
+        if (graphics == null)
+        {
+            graphics = transform.Find("Graphics");
+        }
+
+        if (spriteRenderer == null && graphics != null)
+        {
+            spriteRenderer = graphics.GetComponent<SpriteRenderer>();
+        }
+
+        if (graphics != null)
+        {
+            posicionInicialGraphics = graphics.localPosition;
+        }
+
+        if (spriteRenderer != null)
+        {
+            Color color = spriteRenderer.color;
+            color.a = 1f;
+            spriteRenderer.color = color;
+        }
     }
 
-    void Update()
+    private void Update()
     {
-        if (!recolectado)
-        {
-            float nuevaY = posicionInicial.y +
-                Mathf.Sin(Time.time * flotacionVelocidad) * flotacionAmplitud;
+        if (recolectado)
+            return;
 
-            transform.position = new Vector3(
-                posicionInicial.x,
-                nuevaY,
-                posicionInicial.z
-            );
-        }
+        float nuevaY = posicionInicial.y +
+            Mathf.Sin(Time.time * flotacionVelocidad) * flotacionAmplitud;
+
+        transform.position = new Vector3(
+            posicionInicial.x,
+            nuevaY,
+            posicionInicial.z
+        );
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (recolectado) return;
+        if (recolectado)
+            return;
 
         KitsuneHealth kitsune =
             other.GetComponentInParent<KitsuneHealth>();
 
-        if (kitsune == null) return;
-        if (kitsune.IsDead) return;
+        if (kitsune == null)
+            return;
+
+        if (kitsune.IsDead)
+            return;
 
         Recolectar(kitsune);
     }
@@ -65,17 +97,21 @@ public class FireSpiritPremio : MonoBehaviour
     {
         recolectado = true;
 
+        Debug.Log("Espíritu de fuego recolectado.");
+
+        // Puntos
         if (GameController.Instance != null)
         {
             GameController.Instance.SumarPunto(puntos);
         }
 
+        // Curación
         if (curacionAlRecolectar > 0f)
         {
             kitsune.Heal(curacionAlRecolectar);
         }
 
-        // NUEVO: agregar energía espiritual
+        // Energía espiritual
         KitsuneSpirit spirit =
             kitsune.GetComponent<KitsuneSpirit>();
 
@@ -84,31 +120,54 @@ public class FireSpiritPremio : MonoBehaviour
             spirit.AddSpirit(energiaOtorgada);
         }
 
-        if (animator != null)
-        {
-            animator.SetTrigger("Collected");
-        }
-
+        // Sonido
         if (sonidoRecoleccion != null &&
             audioSource != null)
         {
-            audioSource.PlayOneShot(
-                sonidoRecoleccion
-            );
+            audioSource.PlayOneShot(sonidoRecoleccion);
         }
 
-        GetComponent<Collider2D>().enabled = false;
+        // Desactivar colisión
+        if (colliderPremio != null)
+        {
+            colliderPremio.enabled = false;
+        }
 
-        StartCoroutine(
-            DesaparecerDespues(
-                tiempoAntesDeDesaparecer
-            )
-        );
+        StartCoroutine(EfectoRecoleccion());
     }
 
-    private IEnumerator DesaparecerDespues(float tiempo)
+    private IEnumerator EfectoRecoleccion()
     {
-        yield return new WaitForSeconds(tiempo);
+        if (graphics == null || spriteRenderer == null)
+        {
+            gameObject.SetActive(false);
+            yield break;
+        }
+
+        float tiempo = 0f;
+
+        Vector3 inicio = graphics.localPosition;
+        Vector3 fin = inicio + Vector3.up * alturaSubida;
+
+        Color colorInicial = spriteRenderer.color;
+
+        while (tiempo < duracionEfecto)
+        {
+            tiempo += Time.deltaTime;
+
+            float t = tiempo / duracionEfecto;
+
+            graphics.localPosition =
+                Vector3.Lerp(inicio, fin, t);
+
+            Color color = colorInicial;
+            color.a = Mathf.Lerp(1f, 0f, t);
+
+            spriteRenderer.color = color;
+
+            yield return null;
+        }
+
         gameObject.SetActive(false);
     }
 }
