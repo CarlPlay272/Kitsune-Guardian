@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using TMPro; // Requerido para renderizar el texto flotante en la escena
 
 public class LlaveAzulController : MonoBehaviour
 {
@@ -14,6 +15,11 @@ public class LlaveAzulController : MonoBehaviour
     [SerializeField] private AudioClip sonidoRecoleccion;
     private AudioSource audioSource;
 
+    [Header("Lore de la Llave")]
+    [SerializeField] private TextMeshPro textMeshProComponente;
+    [TextArea(2, 5)][SerializeField] private string textoLlave = "Vaya, una llave brillante. No sé qué puerta abra en este laberinto, pero mi instinto me dice que la guarde bien.";
+    [SerializeField] private float tiempoMensaje = 4.0f;
+
     private bool recolectada = false;
     private Vector3 posicionInicial;
     private SpriteRenderer spriteRenderer;
@@ -23,6 +29,13 @@ public class LlaveAzulController : MonoBehaviour
         posicionInicial = transform.position;
         spriteRenderer = GetComponent<SpriteRenderer>();
         audioSource = GetComponent<AudioSource>();
+
+        if (textMeshProComponente != null)
+        {
+            Color c = textMeshProComponente.color;
+            c.a = 0f;
+            textMeshProComponente.color = c;
+        }
     }
 
     void Update()
@@ -51,7 +64,7 @@ public class LlaveAzulController : MonoBehaviour
 
         if (GameController.Instance != null)
         {
-            GameController.Instance.ObtenerLlaveAzul();
+            GameController.Instance.ObtenerLlaveAzul(); // Registra que el jugador tiene la llave
         }
 
         if (sonidoRecoleccion != null && audioSource != null)
@@ -64,6 +77,42 @@ public class LlaveAzulController : MonoBehaviour
             col.enabled = false;
 
         StartCoroutine(AnimacionDesaparicion());
+
+        if (textMeshProComponente != null)
+        {
+            StartCoroutine(MostrarTextoRoutine());
+        }
+    }
+
+    private IEnumerator MostrarTextoRoutine()
+    {
+        textMeshProComponente.text = textoLlave;
+        float alpha = 0f;
+        while (alpha < 1f)
+        {
+            alpha += Time.deltaTime * 2f;
+            if (textMeshProComponente != null)
+            {
+                Color c = textMeshProComponente.color;
+                c.a = alpha;
+                textMeshProComponente.color = c;
+            }
+            yield return null;
+        }
+
+        yield return new WaitForSeconds(tiempoMensaje);
+
+        while (alpha > 0f)
+        {
+            alpha -= Time.deltaTime * 2f;
+            if (textMeshProComponente != null)
+            {
+                Color c = textMeshProComponente.color;
+                c.a = alpha;
+                textMeshProComponente.color = c;
+            }
+            yield return null;
+        }
     }
 
     private IEnumerator AnimacionDesaparicion()
@@ -86,6 +135,6 @@ public class LlaveAzulController : MonoBehaviour
             yield return null;
         }
 
-        gameObject.SetActive(false);
+        if (spriteRenderer != null) spriteRenderer.enabled = false;
     }
 }
