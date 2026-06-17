@@ -1,4 +1,4 @@
-using UnityEngine;
+锘縰sing UnityEngine;
 using TMPro;
 
 public class GameController : MonoBehaviour
@@ -16,13 +16,13 @@ public class GameController : MonoBehaviour
     [SerializeField] private GameObject gameOverPanel;
 
     [Header("HUD Colas")]
-    [SerializeField] private GameObject colaHUD1; // 馿s/HUD/TailIcons/ColaHUD_01_Invisibilidad
-    [SerializeField] private GameObject colaHUD2; // 馿s/HUD/TailIcons/ColaHUD_02_Dash
+    [SerializeField] private GameObject colaHUD1; // 艅es/HUD/TailIcons/ColaHUD_01_Invisibilidad
+    [SerializeField] private GameObject colaHUD2; // 艅es/HUD/TailIcons/ColaHUD_02_Dash
 
     [Header("Estado")]
-    [SerializeField] private int vidasIniciales = 3;
+    [SerializeField] private int vidasIniciales = 5; // MODIFICADO: De 3 a 5 vidas base para el sistema de corazones
 
-    [Header("Purificaci髇")]
+    [Header("Purificaci贸n")]
     [SerializeField] private GameObject contenedorCorrupcion;
     [SerializeField] private bool bosquePurificado = false;
 
@@ -45,7 +45,7 @@ public class GameController : MonoBehaviour
     private int vidasActuales;
     private int puntosActuales;
 
-    // Propiedades P鷅licas
+    // Propiedades P煤blicas
     public GameObject Player => player;
     public float LimiteIzquierdo => limiteIzquierdo != null ? limiteIzquierdo.position.x : 0f;
     public float LimiteDerecho => limiteDerecho != null ? limiteDerecho.position.x : 0f;
@@ -56,7 +56,7 @@ public class GameController : MonoBehaviour
     public bool InvisibilidadDesbloqueada => invisibilidadDesbloqueada;
     public bool DashDesbloqueado => dashDesbloqueado;
     public bool PlataformaSaltoActiva => plataformaSaltoActiva;
-    
+
     // Getters para el sistema de control secuencial
     public Vector3 PuntoRetornoActual => puntoRetornoActual;
     public int CheckpointActualID => checkpointActualID;
@@ -77,7 +77,7 @@ public class GameController : MonoBehaviour
         if (gameOverPanel != null)
             gameOverPanel.SetActive(false);
 
-        // Inicializar la reaparici髇 en la posici髇 en la que arranca el Player en el mapa
+        // Inicializar la reaparici贸n en la posici贸n en la que arranca el Player en el mapa
         if (player != null)
         {
             puntoRetornoActual = player.transform.position;
@@ -101,19 +101,19 @@ public class GameController : MonoBehaviour
             colaHUD2.SetActive(dashDesbloqueado);
     }
 
-    // M閠odo que valida la secuencia e impide activar puntos anteriores o salteados
+    // M茅todo que valida la secuencia e impide activar puntos anteriores o salteados
     public bool IntentarActivarCheckpoint(int id, Vector3 posicion)
     {
-        // Regla estricta: Solo se activa si es EXACTAMENTE el siguiente en el orden num閞ico (Metroidvania)
+        // Regla estricta: Solo se activa si es EXACTAMENTE el siguiente en el orden num茅rico (Metroidvania)
         if (id == checkpointActualID + 1)
         {
             checkpointActualID = id;
             puntoRetornoActual = posicion;
-            Debug.Log("rogreso Guardado con 閤ito! Ahora el Checkpoint activo es el ID: " + id);
+            Debug.Log("膭Progreso Guardado con 茅xito! Ahora el Checkpoint activo es el ID: " + id);
             return true;
         }
-        
-        Debug.LogWarning("Intento de activaci髇 denegado. Checkpoint ID " + id + " no corresponde a la secuencia actual (ID Global: " + checkpointActualID + ")");
+
+        Debug.LogWarning("Intento de activaci贸n denegado. Checkpoint ID " + id + " no corresponde a la secuencia actual (ID Global: " + checkpointActualID + ")");
         return false;
     }
 
@@ -143,7 +143,7 @@ public class GameController : MonoBehaviour
         if (colaHUD1 != null)
             colaHUD1.SetActive(true);
 
-        Debug.Log("nvisibilidad desbloqueada!");
+        Debug.Log("膭Invisibilidad desbloqueada!");
     }
 
     public void DesbloquearDash()
@@ -155,7 +155,7 @@ public class GameController : MonoBehaviour
         if (colaHUD2 != null)
             colaHUD2.SetActive(true);
 
-        Debug.Log("ash desbloqueado!");
+        Debug.Log("膭Dash desbloqueado!");
     }
 
     public void PurificarBosqueSagrado()
@@ -171,7 +171,7 @@ public class GameController : MonoBehaviour
 
         DesbloquearDash();
 
-        Debug.Log("osque purificado y dash desbloqueado!");
+        Debug.Log("膭Bosque purificado y dash desbloqueado!");
     }
 
     public void ActivarPlataformaSalto()
@@ -190,7 +190,7 @@ public class GameController : MonoBehaviour
         else
             Debug.LogWarning("GameController: jumpPadTrigger no asignado.");
 
-        Debug.Log("engu derrotado! Plataforma de salto activada.");
+        Debug.Log("膭Tengu derrotado! Plataforma de salto activada.");
     }
 
     public void ObtenerLlaveAzul()
@@ -198,7 +198,7 @@ public class GameController : MonoBehaviour
         if (tieneLlave) return;
 
         tieneLlave = true;
-        Debug.Log("lave azul obtenida!");
+        Debug.Log("膭Llave azul obtenida!");
     }
 
     private void ActualizarUI()
