@@ -4,10 +4,14 @@ using TMPro;
 
 public class DialogoProximidad : MonoBehaviour
 {
-    [Header("Configuración del Mensaje")]
+    [Header("Configuración de Mensajes Dinámicos")]
     [TextArea(2, 5)]
-    [SerializeField] private string textoMensaje = "Creo que no es buena idea pasar sobre esta neblina corrupta...";
-    [SerializeField] private float tiempoVisible = 3.5f;
+    [SerializeField] private string textoAntesPurificar = "Siento una densa energía oscura emanando de esta niebla... Cruzar a la fuerza solo destrozará mi esencia espiritual. Debo buscar otra entrada.";
+    [TextArea(2, 5)]
+    [SerializeField] private string textoDespuesPurificar = "¡Excelente! La niebla oscura se ha disipado por completo. El camino hacia las profundidades del bosque finalmente está libre.";
+
+    [Header("Configuración de Tiempos")]
+    [SerializeField] private float tiempoVisible = 4.0f;
     [SerializeField] private float velocidadFade = 2f;
 
     [Header("Referencias UI Internas")]
@@ -23,8 +27,8 @@ public class DialogoProximidad : MonoBehaviour
 
         if (textMeshPro != null)
         {
-            textMeshPro.text = textoMensaje;
-            // Forzar que empiece completamente invisible (Alpha 0)
+            // Forzar que empiece completamente invisible y limpio (Alpha 0)
+            textMeshPro.text = "";
             Color c = textMeshPro.color;
             c.a = 0f;
             textMeshPro.color = c;
@@ -37,13 +41,23 @@ public class DialogoProximidad : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        // Verificar si es el Kitsune usando el script de salud core
         KitsuneHealth jugador = other.GetComponentInParent<KitsuneHealth>();
         if (jugador == null || jugador.IsDead) return;
 
         if (!jugadorAdentro)
         {
             jugadorAdentro = true;
+
+            // EVALUACIÓN DINÁMICA: Revisamos si el bosque ya fue liberado en el GameController
+            if (GameController.Instance != null && GameController.Instance.BosquePurificado)
+            {
+                textMeshPro.text = textoDespuesPurificar;
+            }
+            else
+            {
+                textMeshPro.text = textoAntesPurificar;
+            }
+
             if (coroutineActual != null) StopCoroutine(coroutineActual);
             coroutineActual = StartCoroutine(MostrarTextoRoutine());
         }
@@ -66,7 +80,6 @@ public class DialogoProximidad : MonoBehaviour
     {
         float alpha = textMeshPro.color.a;
 
-        // Efecto Fade In (Aparecer suavemente)
         while (alpha < 1f)
         {
             alpha += Time.deltaTime * velocidadFade;
@@ -75,10 +88,7 @@ public class DialogoProximidad : MonoBehaviour
         }
         DefinirAlpha(1f);
 
-        // Esperar el tiempo configurado flotando en pantalla
         yield return new WaitForSeconds(tiempoVisible);
-
-        // Efecto Fade Out automático por tiempo si el jugador sigue ahí parado
         yield return OcultarTextoRoutine(velocidadFade);
     }
 
