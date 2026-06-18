@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement; // OBLIGATORIO: Para poder cargar el Nivel_2 de forma real
 using TMPro;
@@ -19,11 +19,11 @@ public class PortalMetaController : MonoBehaviour
 
     [Header("Textos Oficiales Seleccionados")]
     [TextArea(2, 5)]
-    [SerializeField] private string textoSinLlave = "¡No puede ser! El portal me rechaza... Está sellado por una fuerza oscura y no tengo la llave. ¡Quedé atrapado! (Presiona R para volver al último checkpoint).";
+    [SerializeField] private string textoSinLlave = "Â¡No puede ser! El portal me rechaza... EstÃ¡ sellado por una fuerza oscura y no tengo la llave. Â¡QuedÃ© atrapado! (Presiona R para volver al Ãºltimo checkpoint).";
     [TextArea(2, 5)]
-    [SerializeField] private string textoConLlave = "¡Aquí vamos!";
+    [SerializeField] private string textoConLlave = "Â¡AquÃ­ vamos!";
 
-    [Header("Control Animación de Transición")]
+    [Header("Control AnimaciÃ³n de TransiciÃ³n")]
     [SerializeField] private float cooldownPortalJugador = 0.8f;
     [SerializeField] private float retrasoCargaEscena = 1.2f;
 
@@ -64,11 +64,10 @@ public class PortalMetaController : MonoBehaviour
             return;
         }
 
-        // Si tiene la llave, se gatilla la secuencia cinematográfica hacia la nueva escena
+        // Si tiene la llave, se gatilla la secuencia cinematogrÃ¡fica hacia la nueva escena
         StartCoroutine(SecuenciaCambioNivelRoutine(kitsuneHealth, rb, portalState));
     }
 
-    // CORREGIDO: Añadido correctamente el tipo 'KitsunePortalState' y su identificador 'portalState'
     private void RechazarJugador(KitsuneHealth kitsuneHealth, KitsuneController kitsuneController, KitsunePortalState portalState, Vector3 posicionJugador)
     {
         kitsuneHealth.TakeDamage(danioBloqueo);
@@ -84,7 +83,7 @@ public class PortalMetaController : MonoBehaviour
             StartCoroutine(MostrarVoidTemporal());
         }
 
-        // Desplegar o reiniciar el cartel flotante de desesperación mística
+        // Desplegar o reiniciar el cartel flotante de desesperaciÃ³n mÃ­stica
         if (corrutinaTexto != null) StopCoroutine(corrutinaTexto);
         corrutinaTexto = StartCoroutine(MostrarTextoRechazoRoutine());
     }
@@ -124,7 +123,7 @@ public class PortalMetaController : MonoBehaviour
         procesandoTransicion = true;
         portalState.BloquearPortales(retrasoCargaEscena + 1f);
 
-        // 1. Congelar físicas por completo (Evita caídas y movimiento del jugador)
+        // 1. Congelar fÃ­sicas por completo (Evita caÃ­das y movimiento del jugador)
         rb.bodyType = RigidbodyType2D.Kinematic;
         rb.linearVelocity = Vector2.zero;
         rb.angularVelocity = 0f;
@@ -133,18 +132,24 @@ public class PortalMetaController : MonoBehaviour
         SpriteRenderer sr = kitsuneHealth.GetComponentInChildren<SpriteRenderer>();
         if (sr != null) sr.enabled = false;
 
-        // 3. Lanzar instantáneamente el cartel cinemático
+        // 3. Lanzar instantÃ¡neamente el cartel cinemÃ¡tico
         if (corrutinaTexto != null) StopCoroutine(corrutinaTexto);
         textMeshProReferencia.text = textoConLlave;
         Color c = textMeshProReferencia.color;
         c.a = 1f;
         textMeshProReferencia.color = c;
 
-        // 4. Cooldown de inmersión espiritual
+        // 4. Cooldown de inmersiÃ³n espiritual
         yield return new WaitForSeconds(retrasoCargaEscena);
 
+        // ðŸ”¥ MODIFICACIÃ“N PERSISTENCIA: Guardar la data actual del jugador antes de destruir la escena
+        if (GameController.Instance != null)
+        {
+            GameController.Instance.GuardarDatosParaSiguienteNivel();
+        }
+
         // 5. CAMBIO DE ESCENA REAL: Cargar el archivo separado de forma absoluta
-        Debug.Log("Secuencia completada con éxito. Cargando de forma nativa: Nivel_2");
+        Debug.Log("Secuencia completada con Ã©xito. Cargando de forma nativa: Nivel_2");
         SceneManager.LoadScene("Nivel_2");
     }
 

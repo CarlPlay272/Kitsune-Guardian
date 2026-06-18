@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement; // OBLIGATORIO: Para poder recargar el nivel completo
 
@@ -13,7 +13,7 @@ public class KitsuneHealth : MonoBehaviour
     [SerializeField] private float respawnDelay = 1f;
     [SerializeField] private bool restoreFullHealthOnRespawn = true;
 
-    [Header("Daño por peligro")]
+    [Header("DaÃ±o por peligro")]
     [SerializeField] private string deathTag = "";
     [SerializeField] private float trapDamage = 999f;
 
@@ -25,13 +25,17 @@ public class KitsuneHealth : MonoBehaviour
     [SerializeField] private KeyCode healKey = KeyCode.K;
     [SerializeField] private float debugStep = 10f;
 
-    [Header("Configuración de Reinicio Total")]
+    [Header("Nuevas Teclas Debug Power-Ups")]
+    [SerializeField] private KeyCode toggleInvisibilidadKey = KeyCode.U; // Tecla U para alternar Invisibilidad
+    [SerializeField] private KeyCode toggleDashKey = KeyCode.I;           // Tecla I para alternar Dash
+
+    [Header("ConfiguraciÃ³n de Reinicio Total")]
     [Tooltip("Tiempo en segundos que se debe mantener presionada la R para reiniciar todo el nivel de cero.")]
     [SerializeField] private float tiempoParaReiniciarNivel = 2.0f;
 
     private bool isDead = false;
     private Vector3 spawnPosition;
-    private float temporizadorR = 0f; // Mide cuánto tiempo se mantiene presionada la tecla R
+    private float temporizadorR = 0f; // Mide cuÃ¡nto tiempo se mantiene presionada la tecla R
 
     public float MaxHealth => maxHealth;
     public float CurrentHealth => currentHealth;
@@ -51,46 +55,63 @@ public class KitsuneHealth : MonoBehaviour
         if (Input.GetKeyDown(toggleDebugKey))
         {
             debugHealthKeysEnabled = !debugHealthKeysEnabled;
-            Debug.Log("Modo debug de vida: " + (debugHealthKeysEnabled ? "ACTIVADO" : "DESACTIVADO"));
+            Debug.Log("Modo debug de salud y habilidades: " + (debugHealthKeysEnabled ? "ACTIVADO" : "DESACTIVADO"));
         }
 
-        if (debugHealthKeysEnabled && Input.GetKeyDown(damageKey))
+        // BLOQUE DE COMANDOS DEL MODO DEBUG
+        if (debugHealthKeysEnabled)
         {
-            TakeDamage(debugStep);
+            if (Input.GetKeyDown(damageKey))
+            {
+                TakeDamage(debugStep);
+            }
+
+            if (Input.GetKeyDown(healKey))
+            {
+                Heal(debugStep);
+            }
+
+            // ðŸ”® TRUCO CON LA U: Alternar el estado de la Invisibilidad
+            if (Input.GetKeyDown(toggleInvisibilidadKey) && GameController.Instance != null)
+            {
+                // Invertimos directamente el valor booleano en el GameController reflejando los cambios en el HUD
+                bool nuevoEstado = !GameController.Instance.InvisibilidadDesbloqueada;
+                GameController.Instance.DesbloquearInvisibilidadDebug(nuevoEstado);
+                Debug.Log("âš¡ [DEBUG] Invisibilidad establecida en: " + nuevoEstado);
+            }
+
+            // ðŸ’¨ TRUCO CON LA I: Alternar el estado del Dash
+            if (Input.GetKeyDown(toggleDashKey) && GameController.Instance != null)
+            {
+                // Invertimos directamente el valor booleano en el GameController reflejando los cambios en el HUD
+                bool nuevoEstado = !GameController.Instance.DashDesbloqueado;
+                GameController.Instance.DesbloquearDashDebug(nuevoEstado);
+                Debug.Log("âš¡ [DEBUG] Habilidad de Dash establecida en: " + nuevoEstado);
+            }
         }
 
-        if (debugHealthKeysEnabled && Input.GetKeyDown(healKey))
-        {
-            Heal(debugStep);
-        }
-
-        // LÓGICA DE REINICIO HÍBRIDA (PULSAR VS MANTENER R)
+        // LÃ“GICA DE REINICIO HÃBRIDA (PULSAR VS MANTENER R)
         if (!isDead)
         {
-            // Mientras la tecla R se mantenga apretada...
             if (Input.GetKey(autoMuerteKey))
             {
                 temporizadorR += Time.deltaTime;
 
-                // Si superó el tiempo límite establecido, se gatilla el reinicio absoluto
                 if (temporizadorR >= tiempoParaReiniciarNivel)
                 {
-                    Debug.Log("Tecla " + autoMuerteKey + " mantenida por " + tiempoParaReiniciarNivel + "s. ¡Reiniciando nivel desde cero de forma absoluta!");
+                    Debug.Log("Tecla " + autoMuerteKey + " mantenida por " + tiempoParaReiniciarNivel + "s. Â¡Reiniciando nivel desde cero de forma absoluta!");
                     ReiniciarNivelCompleto();
                 }
             }
 
-            // En el instante que el jugador SUELTA la tecla R...
             if (Input.GetKeyUp(autoMuerteKey))
             {
-                // Si la soltó rápido (menos del tiempo límite), se interpreta como el suicidio normal
                 if (temporizadorR < tiempoParaReiniciarNivel && temporizadorR > 0.05f)
                 {
-                    Debug.Log("Kitsune atascado. Ejecutando botón de pánico espiritual rápido con la tecla: " + autoMuerteKey);
+                    Debug.Log("Kitsune atascado. Ejecutando botÃ³n de pÃ¡nico espiritual rÃ¡pido con la tecla: " + autoMuerteKey);
                     StartCoroutine(RespawnRoutine());
                 }
 
-                // Resetear el acumulador obligatoriamente al soltar la tecla
                 temporizadorR = 0f;
             }
         }
@@ -98,10 +119,7 @@ public class KitsuneHealth : MonoBehaviour
 
     private void ReiniciarNivelCompleto()
     {
-        // Obtener el nombre de la escena que se está jugando actualmente (ej: "SampleScene")
         string nombreEscenaActual = SceneManager.GetActiveScene().name;
-
-        // Cargar de nuevo la escena limpia, reseteando memoria, enemigos, llaves, checkpoints y powerups
         SceneManager.LoadScene(nombreEscenaActual);
     }
 
@@ -112,7 +130,7 @@ public class KitsuneHealth : MonoBehaviour
         currentHealth -= damage;
         currentHealth = Mathf.Clamp(currentHealth, 0f, maxHealth);
 
-        Debug.Log("Daño recibido. Vida actual: " + currentHealth);
+        Debug.Log("DaÃ±o recibido. Vida actual: " + currentHealth);
 
         if (currentHealth <= 0f)
         {
@@ -127,13 +145,13 @@ public class KitsuneHealth : MonoBehaviour
         currentHealth += amount;
         currentHealth = Mathf.Clamp(currentHealth, 0f, maxHealth);
 
-        Debug.Log("Curación aplicada. Vida actual: " + currentHealth);
+        Debug.Log("CuraciÃ³n aplicada. Vida actual: " + currentHealth);
     }
 
     public void RestoreFullHealth()
     {
         currentHealth = maxHealth;
-        Debug.Log("Vida restaurada al máximo: " + currentHealth);
+        Debug.Log("Vida restaurada al mÃ¡ximo: " + currentHealth);
     }
 
     private void OnTriggerEnter2D(Collider2D other)
@@ -149,7 +167,7 @@ public class KitsuneHealth : MonoBehaviour
     private IEnumerator RespawnRoutine()
     {
         isDead = true;
-        temporizadorR = 0f; // Evitar cualquier conflicto con el contador al morir
+        temporizadorR = 0f;
 
         if (GameController.Instance != null)
         {
@@ -167,7 +185,7 @@ public class KitsuneHealth : MonoBehaviour
         if (GameController.Instance != null)
         {
             transform.position = GameController.Instance.PuntoRetornoActual;
-            Debug.Log("Respawn exitoso en Checkpoint ID actual: " + GameController.Instance.CheckpointActualID + " | Posición: " + transform.position);
+            Debug.Log("Respawn exitoso en Checkpoint ID actual: " + GameController.Instance.CheckpointActualID + " | PosiciÃ³n: " + transform.position);
         }
         else if (respawnPoint != null)
         {
@@ -193,6 +211,6 @@ public class KitsuneHealth : MonoBehaviour
         }
 
         isDead = false;
-        Debug.Log("Kitsune reapareció correctamente.");
+        Debug.Log("Kitsune reapareciÃ³ correctamente.");
     }
 }

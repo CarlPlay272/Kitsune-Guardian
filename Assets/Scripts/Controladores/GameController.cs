@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 public class GameController : MonoBehaviour
 {
@@ -20,7 +21,7 @@ public class GameController : MonoBehaviour
     [SerializeField] private GameObject colaHUD2; // ńes/HUD/TailIcons/ColaHUD_02_Dash
 
     [Header("Estado")]
-    [SerializeField] private int vidasIniciales = 5; // MODIFICADO: De 3 a 5 vidas base para el sistema de corazones
+    [SerializeField] private int vidasIniciales = 5; 
 
     [Header("Purificación")]
     [SerializeField] private GameObject contenedorCorrupcion;
@@ -39,11 +40,20 @@ public class GameController : MonoBehaviour
     [SerializeField] private bool tieneLlave = false;
 
     [Header("Sistema de Checkpoints Secuenciales (GEMINI)")]
-    [SerializeField] private int checkpointActualID = 0; // 0 es el inicio de la escena
+    [SerializeField] private int checkpointActualID = 0; 
     [SerializeField] private Vector3 puntoRetornoActual;
 
     private int vidasActuales;
     private int puntosActuales;
+
+    // VARIABLES CACHÉ PARA PERSISTENCIA ENTRE NIVELES (GEMINI)
+    private static int cachedVidas = -1;
+    private static int cachedPuntos = 0;
+    private static float cachedHealth = -1f;
+    private static float cachedSpirit = -1f;
+    private static bool cachedInvisibilidad = false;
+    private static bool cachedDash = false;
+    private static bool vieneDeNivelAnterior = false;
 
     // Propiedades Públicas
     public GameObject Player => player;
@@ -57,12 +67,12 @@ public class GameController : MonoBehaviour
     public bool DashDesbloqueado => dashDesbloqueado;
     public bool PlataformaSaltoActiva => plataformaSaltoActiva;
 
-    // Getters para el sistema de control secuencial
     public Vector3 PuntoRetornoActual => puntoRetornoActual;
     public int CheckpointActualID => checkpointActualID;
 
     void Awake()
     {
+        // SISTEMA SINGLETON CONTROLADO CON EVENTO DE ESCENAS
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
@@ -70,50 +80,130 @@ public class GameController : MonoBehaviour
         }
 
         Instance = this;
+        DontDestroyOnLoad(gameObject); // El controlador se vuelve eterno
 
-        vidasActuales = vidasIniciales;
-        puntosActuales = 0;
+        // Suscribirse al evento de carga de escena de Unity para inyectar datos al nuevo mapa
+        SceneManager.sceneLoaded += OnSceneLoaded;
 
+        InicializarDatosNivel();
+    }
+
+    void OnDestroy()
+    {
+        // Desuscripción obligatoria para evitar fugas de memoria
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    private void InicializarDatosNivel()
+    {
         if (gameOverPanel != null)
             gameOverPanel.SetActive(false);
 
-        // Inicializar la reaparición en la posición en la que arranca el Player en el mapa
-        if (player != null)
+        // Si es la primera vez que arranca el juego completo
+        if (!vieneDeNivelAnterior)
         {
-            puntoRetornoActual = player.transform.position;
+            vidasActuales = vidasIniciales;
+            puntosActuales = 0;
+            if (player != null)
+            {
+                puntoRetornoActual = player.transform.position;
+            }
+        }
+        else
+        {
+            // ¡MAGIA! Inyectar la data del nivel anterior guardada en el caché estático
+            vidasActuales = cachedVidas;
+            puntosActuales = cachedPuntos;
+            invisibilidadDesbloqueada = cachedInvisibilidad;
+            dashDesbloqueado = cachedDash;
+
+            // Buscar y actualizar al nuevo Kitsune de esta escena
+            ActualizarNuevoPlayerInstanciado();
         }
 
         ActualizarUI();
     }
 
-    void Start()
+    // Se ejecuta automáticamente cada vez que cambia la escena de forma real
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        if (humosSalto != null)
-            humosSalto.SetActive(plataformaSaltoActiva);
+        // Volver a buscar las referencias de UI del nuevo nivel cargado ya que las viejas se destruyeron
+        vidasText = GameObject.Find("VidasText")?.GetComponent<TMP_Text>(); 
+        puntosText = GameObject.Find("PuntosText")?.GetComponent<TMP_Text>();
+        gameOverPanel = GameObject.Find("GameOverPanel");
 
-        if (jumpPadTrigger != null)
-            jumpPadTrigger.SetActive(plataformaSaltoActiva);
+        Transform hudCanvas = GameObject.Find("HUD")?.transform;
+        if (hudCanvas != null)
+        {
+            // Ajustar según los nombres exactos en tu jerarquía si es necesario
+            colaHUD1 = hudCanvas.Find("TailIcons/ColaHUD_01_Invisibilidad")?.gameObject;
+            colaHUD2 = hudCanvas.Find("TailIcons/ColaHUD_02_Dash")?.gameObject;
+        }
 
-        if (colaHUD1 != null)
-            colaHUD1.SetActive(invisibilidadDesbloqueada);
+        if (gameOverPanel != null) gameOverPanel.SetActive(false);
 
-        if (colaHUD2 != null)
-            colaHUD2.SetActive(dashDesbloqueado);
+        // Reconfigurar los estados visuales en el nuevo mapa
+        if (colaHUD1 != null) colaHUD1.SetActive(invisibilidadDesbloqueada);
+        if (colaHUD2 != null) colaHUD2.SetActive(dashDesbloqueado);
+
+        InicializarDatosNivel();
     }
 
-    // Método que valida la secuencia e impide activar puntos anteriores o salteados
+    private void ActualizarNuevoPlayerInstanciado()
+    {
+        player = GameObject.FindGameObjectWithTag("Player");
+
+        if (player != null)
+        {
+            puntoRetornoActual = player.transform.position;
+
+            // Inyectar Vida guardada
+            KitsuneHealth healthComp = player.GetComponentInParent<KitsuneHealth>();
+            if (healthComp != null && cachedHealth > 0)
+            {
+                // Usamos curación/daño controlado para fijar el valor exacto del caché
+                healthComp.RestoreFullHealth();
+                float danioAplicar = healthComp.MaxHealth - cachedHealth;
+                healthComp.TakeDamage(danioAplicar);
+            }
+
+            // Inyectar Energía/Espíritu guardado
+            KitsuneSpirit spiritComp = player.GetComponentInParent<KitsuneSpirit>();
+            if (spiritComp != null && cachedSpirit > 0)
+            {
+                spiritComp.CurrentSpirit = cachedSpirit; // Asegúrate de tener este setter público en KitsuneSpirit
+            }
+        }
+    }
+
+    // LLAMAR ESTE MÉTODO JUSTO ANTES DE REALIZAR EL SCENEMANAGER.LOADSCENE
+    public void GuardarDatosParaSiguienteNivel()
+    {
+        vieneDeNivelAnterior = true;
+        cachedVidas = vidasActuales;
+        cachedPuntos = puntosActuales;
+        cachedInvisibilidad = invisibilidadDesbloqueada;
+        cachedDash = dashDesbloqueado;
+
+        if (player != null)
+        {
+            KitsuneHealth healthComp = player.GetComponentInParent<KitsuneHealth>();
+            if (healthComp != null) cachedHealth = healthComp.CurrentHealth;
+
+            KitsuneSpirit spiritComp = player.GetComponentInParent<KitsuneSpirit>();
+            if (spiritComp != null) cachedSpirit = spiritComp.CurrentSpirit;
+        }
+    }
+
     public bool IntentarActivarCheckpoint(int id, Vector3 posicion)
     {
-        // Regla estricta: Solo se activa si es EXACTAMENTE el siguiente en el orden numérico (Metroidvania)
         if (id == checkpointActualID + 1)
         {
             checkpointActualID = id;
             puntoRetornoActual = posicion;
-            Debug.Log("ĄProgreso Guardado con éxito! Ahora el Checkpoint activo es el ID: " + id);
+            Debug.Log("¡Progreso Guardado con éxito! Ahora el Checkpoint activo es el ID: " + id);
             return true;
         }
-
-        Debug.LogWarning("Intento de activación denegado. Checkpoint ID " + id + " no corresponde a la secuencia actual (ID Global: " + checkpointActualID + ")");
         return false;
     }
 
@@ -137,82 +227,59 @@ public class GameController : MonoBehaviour
     public void DesbloquearInvisibilidad()
     {
         if (invisibilidadDesbloqueada) return;
-
         invisibilidadDesbloqueada = true;
-
-        if (colaHUD1 != null)
-            colaHUD1.SetActive(true);
-
-        Debug.Log("ĄInvisibilidad desbloqueada!");
+        if (colaHUD1 != null) colaHUD1.SetActive(true);
     }
 
     public void DesbloquearDash()
     {
         if (dashDesbloqueado) return;
-
         dashDesbloqueado = true;
-
-        if (colaHUD2 != null)
-            colaHUD2.SetActive(true);
-
-        Debug.Log("ĄDash desbloqueado!");
+        if (colaHUD2 != null) colaHUD2.SetActive(true);
     }
 
     public void PurificarBosqueSagrado()
     {
         if (bosquePurificado) return;
-
         bosquePurificado = true;
-
-        if (contenedorCorrupcion != null)
-            contenedorCorrupcion.SetActive(false);
-        else
-            Debug.LogWarning("GameController: contenedorCorrupcion no asignado.");
-
+        if (contenedorCorrupcion != null) contenedorCorrupcion.SetActive(false);
         DesbloquearDash();
-
-        Debug.Log("ĄBosque purificado y dash desbloqueado!");
     }
 
     public void ActivarPlataformaSalto()
     {
         if (plataformaSaltoActiva) return;
-
         plataformaSaltoActiva = true;
-
-        if (humosSalto != null)
-            humosSalto.SetActive(true);
-        else
-            Debug.LogWarning("GameController: humosSalto no asignado.");
-
-        if (jumpPadTrigger != null)
-            jumpPadTrigger.SetActive(true);
-        else
-            Debug.LogWarning("GameController: jumpPadTrigger no asignado.");
-
-        Debug.Log("ĄTengu derrotado! Plataforma de salto activada.");
+        if (humosSalto != null) humosSalto.SetActive(true);
+        if (jumpPadTrigger != null) jumpPadTrigger.SetActive(true);
     }
 
     public void ObtenerLlaveAzul()
     {
         if (tieneLlave) return;
-
         tieneLlave = true;
-        Debug.Log("ĄLlave azul obtenida!");
     }
 
     private void ActualizarUI()
     {
-        if (vidasText != null)
-            vidasText.text = vidasActuales.ToString();
-
-        if (puntosText != null)
-            puntosText.text = puntosActuales.ToString();
+        if (vidasText != null) vidasText.text = vidasActuales.ToString();
+        if (puntosText != null) puntosText.text = puntosActuales.ToString();
     }
 
     private void ActivarGameOver()
     {
-        if (gameOverPanel != null)
-            gameOverPanel.SetActive(true);
+        if (gameOverPanel != null) gameOverPanel.SetActive(true);
+    }
+
+    public void DesbloquearInvisibilidadDebug(bool estado)
+    {
+        invisibilidadDesbloqueada = estado;
+        if (colaHUD1 != null) colaHUD1.SetActive(estado);
+    }
+
+    public void DesbloquearDashDebug(bool estado)
+    {
+        dashDesbloqueado = estado;
+        if (colaHUD2 != null) colaHUD2.SetActive(estado);
     }
 }
