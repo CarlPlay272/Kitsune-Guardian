@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 using UnityEngine;
-using UnityEngine.SceneManagement; // OBLIGATORIO: Para poder cargar el Nivel_2 de forma real
+using UnityEngine.SceneManagement;
 using TMPro;
 
 public class PortalMetaController : MonoBehaviour
@@ -33,13 +33,20 @@ public class PortalMetaController : MonoBehaviour
 
     void Start()
     {
-        // Limpiar el componente de texto ambiental al arrancar el nivel
         if (textMeshProReferencia != null)
         {
             textMeshProReferencia.text = "";
             Color c = textMeshProReferencia.color;
             c.a = 0f;
             textMeshProReferencia.color = c;
+        }
+
+        // CONTROL DE SEGURIDAD INTER-NIVEL: Liberar controles físicos del zorro al despertar en el mapa nuevo
+        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+        if (playerObj != null)
+        {
+            KitsuneController kc = playerObj.GetComponent<KitsuneController>();
+            if (kc != null) kc.DesbloquearControles();
         }
     }
 
@@ -57,15 +64,15 @@ public class PortalMetaController : MonoBehaviour
         if (rb == null || kitsuneController == null || portalState == null) return;
         if (!portalState.PuedeUsarPortal) return;
 
-        // Evaluar inventario de forma global
-        if (requiereLlave && (GameController.Instance == null || !GameController.Instance.TieneLlave))
+        string escenaActual = SceneManager.GetActiveScene().name;
+
+        if (escenaActual == "Nivel_1" && requiereLlave && (GameController.Instance == null || !GameController.Instance.TieneLlave))
         {
             RechazarJugador(kitsuneHealth, kitsuneController, portalState, kitsuneHealth.transform.position);
             return;
         }
 
-        // Si tiene la llave, se gatilla la secuencia cinematográfica hacia la nueva escena
-        StartCoroutine(SecuenciaCambioNivelRoutine(kitsuneHealth, rb, portalState));
+        StartCoroutine(SecuenciaCambioNivelRoutine(kitsuneHealth, rb, portalState, escenaActual));
     }
 
     private void RechazarJugador(KitsuneHealth kitsuneHealth, KitsuneController kitsuneController, KitsunePortalState portalState, Vector3 posicionJugador)
@@ -83,9 +90,11 @@ public class PortalMetaController : MonoBehaviour
             StartCoroutine(MostrarVoidTemporal());
         }
 
-        // Desplegar o reiniciar el cartel flotante de desesperación mística
-        if (corrutinaTexto != null) StopCoroutine(corrutinaTexto);
-        corrutinaTexto = StartCoroutine(MostrarTextoRechazoRoutine());
+        if (textMeshProReferencia != null)
+        {
+            if (corrutinaTexto != null) StopCoroutine(corrutinaTexto);
+            corrutinaTexto = StartCoroutine(MostrarTextoRechazoRoutine());
+        }
     }
 
     private IEnumerator MostrarTextoRechazoRoutine()
@@ -93,7 +102,6 @@ public class PortalMetaController : MonoBehaviour
         textMeshProReferencia.text = textoSinLlave;
         float alpha = 0f;
 
-        // Fade In
         while (alpha < 1f)
         {
             alpha += Time.deltaTime * 2f;
@@ -105,7 +113,6 @@ public class PortalMetaController : MonoBehaviour
 
         yield return new WaitForSeconds(tiempoVisibleRechazo);
 
-        // Fade Out
         while (alpha > 0f)
         {
             alpha -= Time.deltaTime * 2f;
@@ -118,39 +125,38 @@ public class PortalMetaController : MonoBehaviour
         textMeshProReferencia.text = "";
     }
 
-    private IEnumerator SecuenciaCambioNivelRoutine(KitsuneHealth kitsuneHealth, Rigidbody2D rb, KitsunePortalState portalState)
+    private IEnumerator SecuenciaCambioNivelRoutine(KitsuneHealth kitsuneHealth, Rigidbody2D rb, KitsunePortalState portalState, string escenaOrigen)
     {
         procesandoTransicion = true;
         portalState.BloquearPortales(retrasoCargaEscena + 1f);
 
-        // 1. Congelar físicas por completo (Evita caídas y movimiento del jugador)
         rb.bodyType = RigidbodyType2D.Kinematic;
         rb.linearVelocity = Vector2.zero;
         rb.angularVelocity = 0f;
 
-        // 2. Volver invisible al zorro apagando su renderizador de sprites
         SpriteRenderer sr = kitsuneHealth.GetComponentInChildren<SpriteRenderer>();
         if (sr != null) sr.enabled = false;
 
-        // 3. Lanzar instantáneamente el cartel cinemático
-        if (corrutinaTexto != null) StopCoroutine(corrutinaTexto);
-        textMeshProReferencia.text = textoConLlave;
-        Color c = textMeshProReferencia.color;
-        c.a = 1f;
-        textMeshProReferencia.color = c;
+        if (textMeshProReferencia != null)
+        {
+            if (corrutinaTexto != null) StopCoroutine(corrutinaTexto);
+            textMeshProReferencia.text = textoConLlave;
+            Color c = textMeshProReferencia.color;
+            c.a = 1f;
+            textMeshProReferencia.color = c;
+        }
 
-        // 4. Cooldown de inmersión espiritual
         yield return new WaitForSeconds(retrasoCargaEscena);
 
-        // 🔥 MODIFICACIÓN PERSISTENCIA: Guardar la data actual del jugador antes de destruir la escena
+        string escenaDestino = (escenaOrigen == "Nivel_1") ? "Nivel_2" : "Nivel_1";
+
         if (GameController.Instance != null)
         {
             GameController.Instance.GuardarDatosParaSiguienteNivel();
         }
 
-        // 5. CAMBIO DE ESCENA REAL: Cargar el archivo separado de forma absoluta
-        Debug.Log("Secuencia completada con éxito. Cargando de forma nativa: Nivel_2");
-        SceneManager.LoadScene("Nivel_2");
+        Debug.Log("Cargando escena destino de forma limpia: " + escenaDestino);
+        SceneManager.LoadScene(escenaDestino);
     }
 
     private IEnumerator MostrarVoidTemporal()

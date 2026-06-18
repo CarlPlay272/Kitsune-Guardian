@@ -21,7 +21,7 @@ public class GameController : MonoBehaviour
     [SerializeField] private GameObject colaHUD2; // ńes/HUD/TailIcons/ColaHUD_02_Dash
 
     [Header("Estado")]
-    [SerializeField] private int vidasIniciales = 5; 
+    [SerializeField] private int vidasIniciales = 5;
 
     [Header("Purificación")]
     [SerializeField] private GameObject contenedorCorrupcion;
@@ -40,7 +40,7 @@ public class GameController : MonoBehaviour
     [SerializeField] private bool tieneLlave = false;
 
     [Header("Sistema de Checkpoints Secuenciales (GEMINI)")]
-    [SerializeField] private int checkpointActualID = 0; 
+    [SerializeField] private int checkpointActualID = 0;
     [SerializeField] private Vector3 puntoRetornoActual;
 
     private int vidasActuales;
@@ -111,7 +111,7 @@ public class GameController : MonoBehaviour
         }
         else
         {
-            // ¡MAGIA! Inyectar la data del nivel anterior guardada en el caché estático
+            // Inyectar la data del nivel anterior guardada en el caché estático
             vidasActuales = cachedVidas;
             puntosActuales = cachedPuntos;
             invisibilidadDesbloqueada = cachedInvisibilidad;
@@ -124,18 +124,16 @@ public class GameController : MonoBehaviour
         ActualizarUI();
     }
 
-    // Se ejecuta automáticamente cada vez que cambia la escena de forma real
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         // Volver a buscar las referencias de UI del nuevo nivel cargado ya que las viejas se destruyeron
-        vidasText = GameObject.Find("VidasText")?.GetComponent<TMP_Text>(); 
+        vidasText = GameObject.Find("VidasText")?.GetComponent<TMP_Text>();
         puntosText = GameObject.Find("PuntosText")?.GetComponent<TMP_Text>();
         gameOverPanel = GameObject.Find("GameOverPanel");
 
         Transform hudCanvas = GameObject.Find("HUD")?.transform;
         if (hudCanvas != null)
         {
-            // Ajustar según los nombres exactos en tu jerarquía si es necesario
             colaHUD1 = hudCanvas.Find("TailIcons/ColaHUD_01_Invisibilidad")?.gameObject;
             colaHUD2 = hudCanvas.Find("TailIcons/ColaHUD_02_Dash")?.gameObject;
         }
@@ -155,13 +153,61 @@ public class GameController : MonoBehaviour
 
         if (player != null)
         {
-            puntoRetornoActual = player.transform.position;
+            // 1. BLINDAJE DE FÍSICAS Y RENDERER (Evita que el zorro aparezca tiezo o invisible)
+            Rigidbody2D rb = player.GetComponent<Rigidbody2D>();
+            if (rb != null)
+            {
+                rb.bodyType = RigidbodyType2D.Dynamic; // Forzar a dinámico para devolver el control físico
+                rb.linearVelocity = Vector2.zero;
+                rb.angularVelocity = 0f;
+            }
+
+            SpriteRenderer sr = player.GetComponentInChildren<SpriteRenderer>();
+            if (sr != null)
+            {
+                sr.enabled = true; // Forzar el encendido visual del sprite en la nueva escena
+            }
+
+            string escenaNombre = SceneManager.GetActiveScene().name;
+
+            // 2. ENLAZADO DINÁMICO DE SPAWNS MEDIANTE GAME OBJECTS EXACTOS (GEMINI)
+            if (escenaNombre == "Nivel_1")
+            {
+                GameObject puntoDestino1 = GameObject.Find("DestinoPortal_Mapa1");
+                if (puntoDestino1 != null)
+                {
+                    player.transform.position = puntoDestino1.transform.position;
+                    puntoRetornoActual = puntoDestino1.transform.position;
+                    Debug.Log("↩️ [BACKTRACKING] Kitsune llevado con éxito a: DestinoPortal_Mapa1");
+                }
+                else
+                {
+                    puntoRetornoActual = player.transform.position;
+                }
+            }
+            else if (escenaNombre == "Nivel_2")
+            {
+                GameObject puntoDestino2 = GameObject.Find("DestinoPortal_Mapa2");
+                if (puntoDestino2 != null)
+                {
+                    player.transform.position = puntoDestino2.transform.position;
+                    puntoRetornoActual = puntoDestino2.transform.position;
+                    Debug.Log("🚀 [AVANCE] Kitsune llevado con éxito a: DestinoPortal_Mapa2");
+                }
+                else
+                {
+                    puntoRetornoActual = player.transform.position;
+                }
+            }
+            else
+            {
+                puntoRetornoActual = player.transform.position;
+            }
 
             // Inyectar Vida guardada
             KitsuneHealth healthComp = player.GetComponentInParent<KitsuneHealth>();
             if (healthComp != null && cachedHealth > 0)
             {
-                // Usamos curación/daño controlado para fijar el valor exacto del caché
                 healthComp.RestoreFullHealth();
                 float danioAplicar = healthComp.MaxHealth - cachedHealth;
                 healthComp.TakeDamage(danioAplicar);
@@ -171,12 +217,11 @@ public class GameController : MonoBehaviour
             KitsuneSpirit spiritComp = player.GetComponentInParent<KitsuneSpirit>();
             if (spiritComp != null && cachedSpirit > 0)
             {
-                spiritComp.CurrentSpirit = cachedSpirit; // Asegúrate de tener este setter público en KitsuneSpirit
+                spiritComp.CurrentSpirit = cachedSpirit;
             }
         }
     }
 
-    // LLAMAR ESTE MÉTODO JUSTO ANTES DE REALIZAR EL SCENEMANAGER.LOADSCENE
     public void GuardarDatosParaSiguienteNivel()
     {
         vieneDeNivelAnterior = true;
@@ -201,7 +246,6 @@ public class GameController : MonoBehaviour
         {
             checkpointActualID = id;
             puntoRetornoActual = posicion;
-            Debug.Log("¡Progreso Guardado con éxito! Ahora el Checkpoint activo es el ID: " + id);
             return true;
         }
         return false;
