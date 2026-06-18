@@ -235,7 +235,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 1890410583
-  m_SortingLayer: 2
+  m_SortingLayer: 8
   m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Sprite: {fileID: 1589990265391201859, guid: b291f2033170e3246a6dfe5d327d4712, type: 3}
@@ -334,7 +334,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 1122967323
-  m_SortingLayer: 3
+  m_SortingLayer: 6
   m_SortingOrder: 3
   m_MaskInteraction: 0
   m_Sprite: {fileID: 1024768393108033095, guid: 8acbbbb447821354b8ab0ba1c772eb53, type: 3}
@@ -445,7 +445,7 @@ ParticleSystemRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 1890410583
-  m_SortingLayer: 2
+  m_SortingLayer: 8
   m_SortingOrder: 4
   m_MaskInteraction: 0
   m_RenderMode: 3
@@ -5231,7 +5231,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d2c7852af2ccedf4bb6be8927bf829cc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Menu
-  escenaJugar: SampleScene
+  escenaJugar: Nivel_1
 --- !u!4 &249238842
 Transform:
   m_ObjectHideFlags: 0
@@ -5367,8 +5367,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 77b2395707484cc46b6d1b1983a7c85a, type: 2}
-  m_sharedMaterial: {fileID: 1032971731018460624, guid: 77b2395707484cc46b6d1b1983a7c85a, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -5671,7 +5671,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 1890410583
-  m_SortingLayer: 2
+  m_SortingLayer: 8
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 1589990265391201859, guid: b291f2033170e3246a6dfe5d327d4712, type: 3}
@@ -5994,7 +5994,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 1890410583
-  m_SortingLayer: 2
+  m_SortingLayer: 8
   m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Sprite: {fileID: 1589990265391201859, guid: b291f2033170e3246a6dfe5d327d4712, type: 3}
@@ -6066,8 +6066,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: CREDITOS
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 77b2395707484cc46b6d1b1983a7c85a, type: 2}
-  m_sharedMaterial: {fileID: 1032971731018460624, guid: 77b2395707484cc46b6d1b1983a7c85a, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 264282a2ddd73e045bf2a1c214c8831e, type: 2}
+  m_sharedMaterial: {fileID: -6998566023018380955, guid: 264282a2ddd73e045bf2a1c214c8831e, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -6203,8 +6203,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: SALIR
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 77b2395707484cc46b6d1b1983a7c85a, type: 2}
-  m_sharedMaterial: {fileID: 1032971731018460624, guid: 77b2395707484cc46b6d1b1983a7c85a, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 264282a2ddd73e045bf2a1c214c8831e, type: 2}
+  m_sharedMaterial: {fileID: -6998566023018380955, guid: 264282a2ddd73e045bf2a1c214c8831e, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -6554,7 +6554,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 1890410583
-  m_SortingLayer: 2
+  m_SortingLayer: 8
   m_SortingOrder: 2
   m_MaskInteraction: 0
   m_Sprite: {fileID: 5359341541265223274, guid: 7db7e85ae28967e4bb9c4ce9072899d6, type: 3}
@@ -6698,7 +6698,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 1890410583
-  m_SortingLayer: 2
+  m_SortingLayer: 8
   m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Sprite: {fileID: 1589990265391201859, guid: b291f2033170e3246a6dfe5d327d4712, type: 3}
@@ -6813,7 +6813,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 1890410583
-  m_SortingLayer: 2
+  m_SortingLayer: 8
   m_SortingOrder: 2
   m_MaskInteraction: 0
   m_Sprite: {fileID: 5359341541265223274, guid: 7db7e85ae28967e4bb9c4ce9072899d6, type: 3}
@@ -6957,7 +6957,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 1890410583
-  m_SortingLayer: 2
+  m_SortingLayer: 8
   m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Sprite: {fileID: 1589990265391201859, guid: b291f2033170e3246a6dfe5d327d4712, type: 3}
@@ -7072,7 +7072,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 1890410583
-  m_SortingLayer: 2
+  m_SortingLayer: 8
   m_SortingOrder: 2
   m_MaskInteraction: 0
   m_Sprite: {fileID: 1589990265391201859, guid: b291f2033170e3246a6dfe5d327d4712, type: 3}
@@ -7445,7 +7445,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 1890410583
-  m_SortingLayer: 2
+  m_SortingLayer: 8
   m_SortingOrder: 2
   m_MaskInteraction: 0
   m_Sprite: {fileID: 1589990265391201859, guid: b291f2033170e3246a6dfe5d327d4712, type: 3}
@@ -7755,7 +7755,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 1890410583
-  m_SortingLayer: 2
+  m_SortingLayer: 8
   m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Sprite: {fileID: 1589990265391201859, guid: b291f2033170e3246a6dfe5d327d4712, type: 3}
@@ -7945,7 +7945,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 1890410583
-  m_SortingLayer: 2
+  m_SortingLayer: 8
   m_SortingOrder: 2
   m_MaskInteraction: 0
   m_Sprite: {fileID: 1589990265391201859, guid: b291f2033170e3246a6dfe5d327d4712, type: 3}
@@ -8089,7 +8089,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 1890410583
-  m_SortingLayer: 2
+  m_SortingLayer: 8
   m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Sprite: {fileID: 1589990265391201859, guid: b291f2033170e3246a6dfe5d327d4712, type: 3}
@@ -8218,7 +8218,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 1890410583
-  m_SortingLayer: 2
+  m_SortingLayer: 8
   m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Sprite: {fileID: 1589990265391201859, guid: b291f2033170e3246a6dfe5d327d4712, type: 3}
@@ -8290,8 +8290,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: JUGAR
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 77b2395707484cc46b6d1b1983a7c85a, type: 2}
-  m_sharedMaterial: {fileID: 1032971731018460624, guid: 77b2395707484cc46b6d1b1983a7c85a, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 264282a2ddd73e045bf2a1c214c8831e, type: 2}
+  m_sharedMaterial: {fileID: -6998566023018380955, guid: 264282a2ddd73e045bf2a1c214c8831e, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -8488,8 +8488,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 77b2395707484cc46b6d1b1983a7c85a, type: 2}
-  m_sharedMaterial: {fileID: 1032971731018460624, guid: 77b2395707484cc46b6d1b1983a7c85a, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -8951,8 +8951,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: OPCIONES
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 77b2395707484cc46b6d1b1983a7c85a, type: 2}
-  m_sharedMaterial: {fileID: 1032971731018460624, guid: 77b2395707484cc46b6d1b1983a7c85a, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 264282a2ddd73e045bf2a1c214c8831e, type: 2}
+  m_sharedMaterial: {fileID: -6998566023018380955, guid: 264282a2ddd73e045bf2a1c214c8831e, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -9239,8 +9239,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 77b2395707484cc46b6d1b1983a7c85a, type: 2}
-  m_sharedMaterial: {fileID: 1032971731018460624, guid: 77b2395707484cc46b6d1b1983a7c85a, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -9491,8 +9491,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 77b2395707484cc46b6d1b1983a7c85a, type: 2}
-  m_sharedMaterial: {fileID: 1032971731018460624, guid: 77b2395707484cc46b6d1b1983a7c85a, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []

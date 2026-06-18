@@ -4,14 +4,14 @@ using UnityEngine.SceneManagement;
 public class Menu : MonoBehaviour
 {
     [Header("Escenas")]
-    [SerializeField] private string escenaJugar = "SampleScene";
+    [SerializeField] private string escenaJugar = "Nivel_1"; // CORREGIDO: Apunta por defecto a tu primer nivel real
 
     public void Jugar()
     {
         if (!string.IsNullOrEmpty(escenaJugar))
         {
             Debug.Log("Botón Jugar");
-            SceneManager.LoadScene(escenaJugar);
+            SceneManager.LoadScene(escenaJugar); // Carga de forma limpia el Nivel_1
         }
         else
         {
