@@ -6,7 +6,7 @@ public class AvisoInvisibilidad : MonoBehaviour
 {
     [Header("Configuración del Mensaje")]
     [TextArea(2, 5)]
-    [SerializeField] private string textoMensaje = "Siento una vibra extraña... ¿Acaso dejé algo atrás en las ramas superiores? (Te faltó algo, retrocede)";
+    [SerializeField] private string textoMensaje;
     [SerializeField] private float tiempoVisible = 4.0f;
     [SerializeField] private float velocidadFade = 2f;
 
@@ -37,15 +37,16 @@ public class AvisoInvisibilidad : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        // CONTROL CONDICIONAL: Si el jugador YA tiene la invisibilidad, no muestra nada y sale
-        if (GameController.Instance != null && GameController.Instance.InvisibilidadDesbloqueada)
+        if (GameController.Instance != null &&
+            GameController.Instance.DisparoDesbloqueado)
         {
             return;
         }
 
-        // Verificar si es el Kitsune usando el script de salud core
         KitsuneHealth jugador = other.GetComponentInParent<KitsuneHealth>();
-        if (jugador == null || jugador.IsDead) return;
+
+        if (jugador == null || jugador.IsDead)
+            return;
 
         if (!jugadorAdentro)
         {

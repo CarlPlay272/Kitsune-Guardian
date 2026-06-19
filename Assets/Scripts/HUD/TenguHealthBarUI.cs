@@ -11,7 +11,7 @@ public class TenguHealthBarUI : MonoBehaviour
     [SerializeField] private CanvasGroup canvasGroupBarra;
 
     [Header("Configuración de Proximidad")]
-    [SerializeField] private float distanciaDeteccion = 18f; // Rango óptimo para que abarque la caída a la fosa
+    [SerializeField] private float distanciaDeteccion = 18f;
     [SerializeField] private float velocidadFade = 3f;
 
     private Transform jugadorTransform;
@@ -24,26 +24,31 @@ public class TenguHealthBarUI : MonoBehaviour
 
     void Update()
     {
-        // Enlazar al Kitsune usando de puente el GameController de forma dinámica
+        // Enlazar al jugador desde GameController
         if (jugadorTransform == null && GameController.Instance != null && GameController.Instance.Player != null)
         {
             jugadorTransform = GameController.Instance.Player.transform;
         }
 
-        // Si el jefe ya pasó a mejor vida, desvanecemos la barra del HUD
+        // Si el jefe ya está muerto, ocultar barra
         if (tenguState == null || tenguState.IsDead)
         {
             ControlarFade(0f);
             return;
         }
 
-        // Leer los valores de salud encapsulados mediante Reflection
+        // Actualizar vida del boss
         if (fillImageBoss != null)
         {
             try
             {
-                System.Reflection.FieldInfo fieldCurrent = typeof(TenguState).GetField("currentHealth", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                System.Reflection.FieldInfo fieldMax = typeof(TenguState).GetField("maxHealth", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                System.Reflection.FieldInfo fieldCurrent =
+                    typeof(TenguState).GetField("currentHealth",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+                System.Reflection.FieldInfo fieldMax =
+                    typeof(TenguState).GetField("maxHealth",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 
                 if (fieldCurrent != null && fieldMax != null)
                 {
@@ -59,19 +64,24 @@ public class TenguHealthBarUI : MonoBehaviour
             }
         }
 
-        // Manejar el sistema de proximidad
+        // Sistema de aparición
         if (jugadorTransform != null)
         {
-            float distancia = Vector2.Distance(tenguState.transform.position, jugadorTransform.position);
+            float distancia = Vector2.Distance(
+                tenguState.transform.position,
+                jugadorTransform.position
+            );
 
-            // Condición estricta: Solo aparece en proximidad Y si el Kitsune ya posee el Dash (Paso 2 terminado)
-            if (distancia <= distanciaDeteccion && GameController.Instance.DashDesbloqueado)
+            // SOLO aparece si tienes el disparo desbloqueado y estás cerca del Tengu
+            if (GameController.Instance != null &&
+                GameController.Instance.DisparoDesbloqueado &&
+                distancia <= distanciaDeteccion)
             {
-                ControlarFade(1f); // Fade In
+                ControlarFade(1f); // Mostrar barra
             }
             else
             {
-                ControlarFade(0f); // Fade Out
+                ControlarFade(0f); // Ocultar barra
             }
         }
     }
@@ -80,7 +90,12 @@ public class TenguHealthBarUI : MonoBehaviour
     {
         if (canvasGroupBarra != null)
         {
-            canvasGroupBarra.alpha = Mathf.MoveTowards(canvasGroupBarra.alpha, targetAlpha, Time.deltaTime * velocidadFade);
+            canvasGroupBarra.alpha =
+                Mathf.MoveTowards(
+                    canvasGroupBarra.alpha,
+                    targetAlpha,
+                    Time.deltaTime * velocidadFade
+                );
         }
     }
 }

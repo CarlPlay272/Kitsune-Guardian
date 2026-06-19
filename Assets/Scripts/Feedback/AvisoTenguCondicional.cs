@@ -4,14 +4,18 @@ using TMPro;
 
 public class AvisoTenguCondicional : MonoBehaviour
 {
-    // NUEVO: Permite que otros scripts sepan si el jugador ya llegó hasta aquí
+    // Permite que otros scripts sepan si el jugador ya llegó hasta aquí
     public static bool VistoAlTengu { get; private set; } = false;
 
     [Header("Textos del Lore")]
     [TextArea(2, 5)]
-    [SerializeField] private string textoConInvisibilidad = "Ese es el gran Tengu... Siento que si activo mi Invisibilidad (Teclado: Q) podré colarme por su espalda sin que note mi presencia.";
+    [SerializeField]
+    private string textoConDisparo;
+
     [TextArea(2, 5)]
-    [SerializeField] private string textoSinInvisibilidad = "¡Un momento! Ese demonio es invencible en mi estado actual... Siento que la corrupción me destruirá si me acerco. No debí bajar corriendo. (Mantén presionada R para reiniciar el nivel).";
+    [SerializeField]
+    private string textoSinDisparo =
+        "¡Un momento! Ese demonio es demasiado poderoso. Siento que necesito recuperar más de mi energía espiritual antes de intentarlo.";
 
     [Header("Configuración")]
     [SerializeField] private float tiempoVisible = 4.5f;
@@ -25,70 +29,95 @@ public class AvisoTenguCondicional : MonoBehaviour
     {
         // Al reiniciar el nivel de cero, reseteamos la variable global obligatoriamente
         VistoAlTengu = false;
-        if (textMeshPro == null) textMeshPro = GetComponentInChildren<TextMeshPro>();
-        if (textMeshPro != null) DefinirAlpha(0f);
+
+        if (textMeshPro == null)
+            textMeshPro = GetComponentInChildren<TextMeshPro>();
+
+        if (textMeshPro != null)
+            DefinirAlpha(0f);
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (GameController.Instance != null && GameController.Instance.BosquePurificado)
+        if (GameController.Instance != null &&
+            GameController.Instance.BosquePurificado)
         {
             return;
         }
 
-        KitsuneHealth jugador = other.GetComponentInParent<KitsuneHealth>();
-        if (jugador == null || jugador.IsDead) return;
+        KitsuneHealth jugador =
+            other.GetComponentInParent<KitsuneHealth>();
+
+        if (jugador == null || jugador.IsDead)
+            return;
 
         if (!jugadorAdentro)
         {
             jugadorAdentro = true;
-            VistoAlTengu = true; // ¡REGISTRO! El jugador ya descubrió al Tengu
 
-            if (GameController.Instance != null && GameController.Instance.InvisibilidadDesbloqueada)
+            // Registro: el jugador ya descubrió al Tengu
+            VistoAlTengu = true;
+
+            if (GameController.Instance != null &&
+                GameController.Instance.DisparoDesbloqueado)
             {
-                textMeshPro.text = textoConInvisibilidad;
+                textMeshPro.text = textoConDisparo;
             }
             else
             {
-                textMeshPro.text = textoSinInvisibilidad;
+                textMeshPro.text = textoSinDisparo;
             }
 
-            if (coroutineActual != null) StopCoroutine(coroutineActual);
-            coroutineActual = StartCoroutine(MostrarTextoRoutine());
+            if (coroutineActual != null)
+                StopCoroutine(coroutineActual);
+
+            coroutineActual =
+                StartCoroutine(MostrarTextoRoutine());
         }
     }
 
     private void OnTriggerExit2D(Collider2D other)
     {
-        KitsuneHealth jugador = other.GetComponentInParent<KitsuneHealth>();
-        if (jugador == null) return;
+        KitsuneHealth jugador =
+            other.GetComponentInParent<KitsuneHealth>();
+
+        if (jugador == null)
+            return;
 
         if (jugadorAdentro)
         {
             jugadorAdentro = false;
-            if (coroutineActual != null) StopCoroutine(coroutineActual);
-            coroutineActual = StartCoroutine(OcultarTextoRoutine(0f));
+
+            if (coroutineActual != null)
+                StopCoroutine(coroutineActual);
+
+            coroutineActual =
+                StartCoroutine(OcultarTextoRoutine(0f));
         }
     }
 
     private IEnumerator MostrarTextoRoutine()
     {
         float alpha = textMeshPro.color.a;
+
         while (alpha < 1f)
         {
             alpha += Time.deltaTime * velocidadFade;
             DefinirAlpha(alpha);
             yield return null;
         }
+
         DefinirAlpha(1f);
 
         yield return new WaitForSeconds(tiempoVisible);
+
         yield return OcultarTextoRoutine(velocidadFade);
     }
 
     private IEnumerator OcultarTextoRoutine(float velocidad)
     {
         float alpha = textMeshPro.color.a;
+
         if (velocidad > 0f)
         {
             while (alpha > 0f)
@@ -98,6 +127,7 @@ public class AvisoTenguCondicional : MonoBehaviour
                 yield return null;
             }
         }
+
         DefinirAlpha(0f);
     }
 

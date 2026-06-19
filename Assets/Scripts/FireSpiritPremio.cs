@@ -10,8 +10,7 @@ public class FireSpiritPremio : MonoBehaviour
     [Header("Premio")]
     [SerializeField] private int puntos = 1;
     [SerializeField] private float curacionAlRecolectar = 25f;
-    [SerializeField] private float energiaOtorgada = 10f;
-
+    [SerializeField] private float energiaOtorgada = 3f;
     [Header("Efecto de recolección")]
     [SerializeField] private float duracionEfecto = 0.5f;
     [SerializeField] private float alturaSubida = 0.5f;
@@ -118,13 +117,22 @@ public class FireSpiritPremio : MonoBehaviour
         if (spirit != null)
         {
             spirit.AddSpirit(energiaOtorgada);
+
+            Debug.Log(
+                "Espíritu actual: " +
+                spirit.CurrentSpirit +
+                "/" +
+                spirit.MaxSpirit
+            );
         }
 
         // Sonido
         if (sonidoRecoleccion != null &&
             audioSource != null)
         {
-            audioSource.PlayOneShot(sonidoRecoleccion);
+            audioSource.PlayOneShot(
+                sonidoRecoleccion
+            );
         }
 
         // Desactivar colisión

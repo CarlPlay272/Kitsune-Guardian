@@ -35,6 +35,7 @@ public class GameController : MonoBehaviour
     [Header("Poderes")]
     [SerializeField] private bool invisibilidadDesbloqueada = false;
     [SerializeField] private bool dashDesbloqueado = false;
+    [SerializeField] private bool disparoDesbloqueado = false;
 
     [Header("Llave del nivel")]
     [SerializeField] private bool tieneLlave = false;
@@ -65,6 +66,7 @@ public class GameController : MonoBehaviour
     public bool TieneLlave => tieneLlave;
     public bool InvisibilidadDesbloqueada => invisibilidadDesbloqueada;
     public bool DashDesbloqueado => dashDesbloqueado;
+    public bool DisparoDesbloqueado => disparoDesbloqueado;
     public bool PlataformaSaltoActiva => plataformaSaltoActiva;
 
     public Vector3 PuntoRetornoActual => puntoRetornoActual;
@@ -282,12 +284,29 @@ public class GameController : MonoBehaviour
         if (colaHUD2 != null) colaHUD2.SetActive(true);
     }
 
+    public void DesbloquearDisparo()
+    {
+        if (disparoDesbloqueado)
+            return;
+
+        disparoDesbloqueado = true;
+
+        Debug.Log("Disparo desbloqueado");
+    }
+
     public void PurificarBosqueSagrado()
     {
         if (bosquePurificado) return;
+
         bosquePurificado = true;
-        if (contenedorCorrupcion != null) contenedorCorrupcion.SetActive(false);
-        DesbloquearDash();
+
+        if (contenedorCorrupcion != null)
+        {
+            contenedorCorrupcion.SetActive(false);
+        }
+
+        // ❌ Dash eliminado para Nivel 1
+        // Se desbloqueará en Nivel 2 mediante otro evento
     }
 
     public void ActivarPlataformaSalto()

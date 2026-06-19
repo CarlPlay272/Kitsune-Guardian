@@ -37,6 +37,22 @@ public class KitsuneController : MonoBehaviour
     [SerializeField] private Animator animator;
     [SerializeField] private Rigidbody2D rb;
 
+    [Header("Disparo")]
+    [SerializeField] private GameObject fireballPrefab;
+    [SerializeField] private Transform shootPoint;
+    [SerializeField] private KeyCode shootKey = KeyCode.J;
+    [SerializeField] private float shootCooldown = 0.15f;
+    [SerializeField] private float spiritCostPerShot = 1f;
+
+    [Header("Recuperación Espíritu")]
+    [SerializeField] private float spiritRecoveryInterval = 5f;
+    [SerializeField] private float spiritRecoveryAmount = 2f;
+
+    private float nextShootTime = 0f;
+    private float nextSpiritRecoveryTime = 0f;
+
+    private KitsuneSpirit kitsuneSpirit;
+
     private float moveInput;
     private bool isGrounded;
     private bool facingRight = true;
@@ -72,6 +88,7 @@ public class KitsuneController : MonoBehaviour
 
         spriteRenderers = GetComponentsInChildren<SpriteRenderer>();
         playerColliders = GetComponentsInChildren<Collider2D>();
+        kitsuneSpirit = GetComponent<KitsuneSpirit>();
     }
 
     void Start()
@@ -109,6 +126,8 @@ public class KitsuneController : MonoBehaviour
 
         GestionarInputInvisibilidad();
         GestionarInputDash();
+        GestionarInputDisparo();
+        RecuperarEspirituInvisible();
 
         if (isInvisible && Time.time >= invisibilityEndTime)
         {
@@ -128,6 +147,86 @@ public class KitsuneController : MonoBehaviour
             animator.SetFloat("Speed", Mathf.Abs(moveInput));
             animator.SetBool("IsGrounded", isGrounded);
         }
+    }
+
+    void GestionarInputDisparo()
+    {
+        if (GameController.Instance == null)
+            return;
+
+        if (!GameController.Instance.DisparoDesbloqueado)
+            return;
+
+        if (controlBloqueado)
+            return;
+
+        if (isDashing)
+            return;
+
+        if (fireballPrefab == null)
+            return;
+
+        if (shootPoint == null)
+            return;
+
+        if (kitsuneSpirit == null)
+            return;
+
+        if (Time.time < nextShootTime)
+            return;
+
+        if (!Input.GetKeyDown(shootKey))
+            return;
+
+        if (!kitsuneSpirit.ConsumeSpirit(spiritCostPerShot))
+        {
+            Debug.Log("Sin espíritu suficiente");
+            return;
+        }
+
+        if (animator != null)
+        {
+            animator.SetTrigger("Shoot");
+        }
+
+        nextShootTime = Time.time + shootCooldown;
+
+        GameObject fireball = Instantiate(
+            fireballPrefab,
+            shootPoint.position,
+            Quaternion.identity
+        );
+
+        Fireball fireballScript =
+            fireball.GetComponent<Fireball>();
+
+        if (fireballScript != null)
+        {
+            fireballScript.SetDirection(
+                facingRight ? 1 : -1
+            );
+        }
+
+        Debug.Log("Disparo realizado");
+    }
+
+    void RecuperarEspirituInvisible()
+    {
+        if (!isInvisible)
+            return;
+
+        if (kitsuneSpirit == null)
+            return;
+
+        if (Time.time < nextSpiritRecoveryTime)
+            return;
+
+        nextSpiritRecoveryTime =
+            Time.time + spiritRecoveryInterval;
+
+        kitsuneSpirit.AddSpirit(
+            spiritRecoveryAmount
+        );
     }
 
     void FixedUpdate()
@@ -168,6 +267,8 @@ public class KitsuneController : MonoBehaviour
     {
         isInvisible = true;
         invisibilityEndTime = Time.time + duracionMaximaInvisibilidad;
+
+        nextSpiritRecoveryTime = Time.time + spiritRecoveryInterval;
 
         AplicarTransparencia(alphaInvisible);
         IgnorarColisionConTengus(true);
