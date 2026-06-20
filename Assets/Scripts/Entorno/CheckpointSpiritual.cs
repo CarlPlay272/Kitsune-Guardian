@@ -68,20 +68,25 @@ public class CheckpointSpiritual : MonoBehaviour
 
             if (exito)
             {
-                Debug.Log("Criterio de secuencia aprobado para Checkpoint ID: " + checkpointID);
+                yaFueActivado = true;
+
+                ActivarVisualmente();
+
+                Debug.Log(
+                    "Checkpoint activado: " +
+                    checkpointID
+                );
             }
         }
     }
 
     private void ActivarVisualmente()
     {
-        AplicarFiltro(colorVanilla); // Quita el filtro plomo y lo devuelve a su color base original
+        AplicarFiltro(colorVanilla);
 
         if (animator != null)
         {
-            // Forzamos al Animator a reproducir el estado desde cero y lanzamos el trigger de destello
-            animator.Play("Idle_Inactivo", 0, 0f);
-            animator.SetTrigger("Activar");
+            animator.Play("Activar_Checkpoint", 0, 0f);
         }
     }
 

@@ -1,591 +1,411 @@
-using System.Collections;
-using UnityEngine;
+﻿using UnityEngine;
 
+/// <summary>
+/// IA del enemigo Tengu para un plataformero 2D. Reescrita desde cero
+/// alrededor de un único principio: UNA sola fuente de verdad por cosa.
+///
+///   - Una sola variable decide el estado (estadoActual).
+///   - Una sola función decide hacia dónde mira el sprite (AplicarOrientacion).
+///   - Una sola variable decide el movimiento horizontal (moveDirectionX),
+///     y se resetea en el MISMO frame en que se entra a Atacando — nunca
+///     queda movimiento "residual" de un estado anterior.
+///   - Todas las distancias (detección, persecución, ataque) usan
+///     SIEMPRE transform.position — nunca Collider2D.bounds. Mezclar
+///     ambas referencias fue la causa de los bugs anteriores (el bounds
+///     se desplaza cuando el sprite se flipea via localScale negativo).
+///   - La detección y el ataque tienen FILTROS DE ALTURA INDEPENDIENTES:
+///     maxHeightDifference (generoso, para perseguir entre plataformas
+///     con desnivel) y attackHeightTolerance (estricto, para que solo
+///     golpee si el jugador está realmente a su mismo nivel, no saltando
+///     a la altura de la cabeza).
+///   - Rango de ataque y detección usan SIEMPRE distancia horizontal pura
+///     (Mathf.Abs en X), nunca Vector2.Distance — así no hay desfasajes
+///     por diferencias de altura entre pivotes.
+///
+/// Sin NavMesh, sin pathfinding, sin saltos. Solo distancias en X y dos
+/// filtros de altura en Y (uno para detectar, otro para atacar).
+/// </summary>
 public class TenguAI : MonoBehaviour
 {
     private enum EstadoTengu
     {
         Patrullando,
-        Esperando,
         Persiguiendo,
-        Atacando,
-        Regresando,
-        Muerto
+        Atacando
     }
 
     [Header("Referencias")]
     [SerializeField] private Transform patrolPointA;
     [SerializeField] private Transform patrolPointB;
     [SerializeField] private Transform player;
-    [SerializeField] private Transform graphics;
-    [SerializeField] private Transform attackPoint;
     [SerializeField] private Animator animator;
     [SerializeField] private Rigidbody2D rb;
     [SerializeField] private TenguState tenguState;
 
     [Header("Movimiento")]
     [SerializeField] private float patrolSpeed = 2f;
-    [SerializeField] private float chaseSpeed = 7f;
-    [SerializeField] private float returnSpeed = 3f;
-    [SerializeField] private float pointReachDistance = 0.35f;
+    [SerializeField] private float chaseSpeed = 4f;
+    [SerializeField] private float pointReachDistance = 0.2f;
 
-    [Header("Espera")]
-    [SerializeField] private float waitTimeMin = 1.2f;
-    [SerializeField] private float waitTimeMax = 2f;
+    [Header("Espera en puntos de patrulla")]
+    [SerializeField] private float waitTimeAtPoint = 1.5f;
 
-    [Header("Detecci�n")]
-    [SerializeField] private float detectionRange = 9f;
-    [SerializeField] private float closeDetectionRange = 1.7f;
-    [SerializeField] private float verticalDetectionHeight = 2.4f;
-    [SerializeField] private float combatHeightOffset = -0.55f;
-
-    [Header("Persecuci�n")]
-    [SerializeField] private float stopChaseDistance = 2f;
-    [SerializeField] private float maxChaseDistanceFromOrigin = 10f;
+    [Header("Detección")]
+    [SerializeField] private float detectionRange = 6f;
+    [SerializeField] private float maxHeightDifference = 1.5f;
 
     [Header("Ataque")]
-    [SerializeField] private float attackRadius = 1.1f;
-    [SerializeField] private float attackConnectRadius = 2f;
-    [SerializeField] private float frontalDamage = 16f;
-    [SerializeField] private float arribaDamage = 55f;
-    [SerializeField] private float attackCooldown = 0.45f;
-    [SerializeField] private float attackStopTime = 0.22f;
-    [SerializeField] private float frontalMeleeLockDistance = 2f;
+    [SerializeField] private float attackRange = 1.2f;
+    [SerializeField] private float attackHeightTolerance = 0.4f;
+    [SerializeField] private float attackCooldown = 1f;
+    [SerializeField] private float attackDamage = 10f;
+
     [Header("Debug")]
     [SerializeField] private bool debugLogs = true;
 
     private EstadoTengu estadoActual = EstadoTengu.Patrullando;
-    private Transform currentPatrolTarget;
-    private Vector2 spawnPosition;
-    private Vector2 movementTarget;
-    private float currentMoveSpeed = 0f;
+
+    private Transform patrolTarget;
+    private float waitTimer = 0f;
+    private bool isWaiting = false;
+
     private float lastAttackTime = -999f;
-    private bool waitingCoroutineRunning = false;
+    private float moveDirectionX = 0f;
 
-    private float attackStopTimer = 0f;
-    private bool attackDamagePending = false;
-    private float attackDamageMoment = 0f;
-
-    public Transform Graphics => graphics;
+    public Transform Graphics => transform;
 
     void Awake()
     {
-        if (animator == null)
-            animator = GetComponent<Animator>();
-
-        if (rb == null)
-            rb = GetComponent<Rigidbody2D>();
-
-        if (tenguState == null)
-            tenguState = GetComponent<TenguState>();
+        if (animator == null) animator = GetComponent<Animator>();
+        if (rb == null) rb = GetComponent<Rigidbody2D>();
+        if (tenguState == null) tenguState = GetComponent<TenguState>();
     }
 
     void Start()
     {
-        spawnPosition = rb.position;
-
-        if (patrolPointA != null && patrolPointB != null)
-            currentPatrolTarget = patrolPointB;
-
-        if (player == null && GameController.Instance != null && GameController.Instance.Player != null)
-            player = GameController.Instance.Player.transform;
+        patrolTarget = patrolPointB != null ? patrolPointB : patrolPointA;
     }
 
     void Update()
     {
-        if (attackStopTimer > 0f)
-            attackStopTimer -= Time.deltaTime;
-
-        if (attackDamagePending && Time.time >= attackDamageMoment)
-            ResolverImpactoPendiente();
-
         if (tenguState != null && tenguState.IsDead)
         {
-            CambiarEstado(EstadoTengu.Muerto);
-            currentMoveSpeed = 0f;
-            ActualizarAnimacion(0f, false);
+            DetenerMovimientoCompleto();
+            SincronizarAnimator();
             return;
         }
 
-        if (player == null)
+        bool playerDetected = JugadorDetectado();
+        bool playerInAttackRange = playerDetected && JugadorEnRangoDeAtaque();
+
+        if (debugLogs)
         {
-            EjecutarPatrulla();
-            return;
+            float alturaDebug = Mathf.Abs(transform.position.y - player.position.y);
+            Debug.Log(
+                "Detectado: " + playerDetected +
+                " | Ataque: " + playerInAttackRange +
+                " | DistX: " + DistanciaHorizontalAlJugador() +
+                " | Altura: " + alturaDebug
+            );
         }
-
-        KitsuneController kitsuneController = player.GetComponent<KitsuneController>();
-        if (kitsuneController == null)
-            kitsuneController = player.GetComponentInParent<KitsuneController>();
-
-        bool playerInvisible = kitsuneController != null && kitsuneController.IsInvisible;
-
-        float distanceToPlayer = Vector2.Distance(rb.position, player.position);
-        float distanceFromOrigin = Vector2.Distance(rb.position, spawnPosition);
-
-        bool playerInFront = JugadorEstaAlFrente();
-        bool playerVeryClose = distanceToPlayer <= closeDetectionRange;
-        bool playerVeryCloseFront = JugadorMuyCercaFrontal();
-        bool playerOnTop = JugadorEstaEncima();
-        bool playerInsideAttackZone = EstaJugadorEnZonaDeAtaque();
-        bool shouldMeleeLock = DebeBloquearseParaAtacar();
-
-        bool playerAboveOrNear =
-            Mathf.Abs(player.position.x - transform.position.x) <= closeDetectionRange + 0.25f &&
-            Mathf.Abs(player.position.y - AlturaCombateTengu()) <= verticalDetectionHeight;
-
-        if (playerInvisible)
-        {
-            playerVeryClose = false;
-            playerVeryCloseFront = false;
-            playerOnTop = false;
-            playerInsideAttackZone = false;
-            shouldMeleeLock = false;
-            playerAboveOrNear = false;
-        }
-
-        bool playerDetected = !playerInvisible && (
-            (playerInFront && distanceToPlayer <= detectionRange) ||
-            playerVeryClose ||
-            playerAboveOrNear ||
-            playerOnTop
-        );
-
-        bool playerInsideChaseZone = distanceFromOrigin <= maxChaseDistanceFromOrigin;
 
         switch (estadoActual)
         {
             case EstadoTengu.Patrullando:
-                if (playerOnTop || shouldMeleeLock)
-                {
-                    StopAllCoroutines();
-                    waitingCoroutineRunning = false;
-                    CambiarEstado(EstadoTengu.Atacando);
-                }
-                else if (playerDetected && playerInsideChaseZone)
-                {
-                    StopAllCoroutines();
-                    waitingCoroutineRunning = false;
-                    CambiarEstado(EstadoTengu.Persiguiendo);
-                }
-                else
-                {
-                    EjecutarPatrulla();
-                }
-                break;
-
-            case EstadoTengu.Esperando:
-                if (playerOnTop || shouldMeleeLock)
-                {
-                    StopAllCoroutines();
-                    waitingCoroutineRunning = false;
-                    CambiarEstado(EstadoTengu.Atacando);
-                }
-                else if (playerDetected && playerInsideChaseZone)
-                {
-                    StopAllCoroutines();
-                    waitingCoroutineRunning = false;
-                    CambiarEstado(EstadoTengu.Persiguiendo);
-                }
-                else
-                {
-                    currentMoveSpeed = 0f;
-                    ActualizarAnimacion(0f, false);
-                }
+                ActualizarPatrulla();
+                if (playerDetected)
+                    CambiarEstado(EstadoTengu.Persiguiendo, "jugador detectado");
                 break;
 
             case EstadoTengu.Persiguiendo:
-                if (!playerInsideChaseZone)
+                if (!playerDetected)
                 {
-                    CambiarEstado(EstadoTengu.Regresando);
+                    if (debugLogs) Debug.Log("[Tengu] Objetivo perdido (fuera de rango o de altura).");
+                    VolverAPatrullaMasCercana();
+                    CambiarEstado(EstadoTengu.Patrullando, "objetivo perdido");
+                    break;
                 }
-                else if (shouldMeleeLock || playerInsideAttackZone || playerVeryCloseFront || playerOnTop || distanceToPlayer <= stopChaseDistance || playerAboveOrNear)
+
+                if (playerInAttackRange)
                 {
-                    CambiarEstado(EstadoTengu.Atacando);
+                    CambiarEstado(EstadoTengu.Atacando, "jugador en rango de ataque");
+                    break;
                 }
-                else if (!playerDetected)
-                {
-                    CambiarEstado(EstadoTengu.Regresando);
-                }
-                else
-                {
-                    PrepararPersecucion();
-                }
+
+                ActualizarPersecucion();
                 break;
 
             case EstadoTengu.Atacando:
-                if (!playerInsideChaseZone)
-                {
-                    CambiarEstado(EstadoTengu.Regresando);
-                }
-                else if (!attackDamagePending && !shouldMeleeLock && !playerInsideAttackZone && !playerVeryCloseFront && !playerOnTop && distanceToPlayer > frontalMeleeLockDistance + 0.75f && !playerAboveOrNear)
-                {
-                    CambiarEstado(EstadoTengu.Persiguiendo);
-                }
-                else if (playerInvisible)
-                {
-                    CambiarEstado(EstadoTengu.Regresando);
-                }
-                else
-                {
-                    PrepararAtaque();
-                }
-                break;
+                // Se frena ANTES de cualquier otra cosa, en el mismo frame
+                // en que se evalúa este estado. No hay margen para que
+                // quede movimiento residual.
+                DetenerMovimientoHorizontal();
+                AplicarOrientacion(player.position.x);
 
-            case EstadoTengu.Regresando:
-                if (playerOnTop || shouldMeleeLock)
+                if (!playerDetected)
                 {
-                    CambiarEstado(EstadoTengu.Atacando);
+                    if (debugLogs) Debug.Log("[Tengu] Objetivo perdido durante el ataque.");
+                    VolverAPatrullaMasCercana();
+                    CambiarEstado(EstadoTengu.Patrullando, "objetivo perdido");
+                    break;
                 }
-                else if (playerDetected && playerInsideChaseZone)
-                {
-                    CambiarEstado(EstadoTengu.Persiguiendo);
-                }
-                else
-                {
-                    PrepararRegreso();
-                }
-                break;
 
-            case EstadoTengu.Muerto:
-                currentMoveSpeed = 0f;
-                ActualizarAnimacion(0f, false);
+                if (!playerInAttackRange)
+                {
+                    CambiarEstado(EstadoTengu.Persiguiendo, "jugador salió del rango de ataque");
+                    break;
+                }
+
+                IntentarAtacar();
                 break;
         }
+
+        SincronizarAnimator();
+
+        if (debugLogs)
+            Debug.Log("Estado: " + estadoActual + " | DistX: " + DistanciaHorizontalAlJugador());
     }
 
     void FixedUpdate()
     {
-        if (estadoActual == EstadoTengu.Muerto) return;
+        if (tenguState != null && tenguState.IsDead) return;
 
-        if (estadoActual == EstadoTengu.Atacando || attackStopTimer > 0f)
+        // El movimiento SOLO ocurre fuera del estado Atacando. No hay
+        // ninguna otra ruta de código que mueva al Tengu.
+        if (estadoActual == EstadoTengu.Atacando) return;
+
+        if (moveDirectionX != 0f && rb != null)
         {
-            rb.linearVelocity = Vector2.zero;
-            return;
-        }
-
-        if (currentMoveSpeed > 0f)
-        {
-            Vector2 newPosition = Vector2.MoveTowards(rb.position, movementTarget, currentMoveSpeed * Time.fixedDeltaTime);
-            rb.MovePosition(newPosition);
-        }
-    }
-
-    void EjecutarPatrulla()
-    {
-        if (patrolPointA == null || patrolPointB == null || currentPatrolTarget == null)
-        {
-            currentMoveSpeed = 0f;
-            ActualizarAnimacion(0f, false);
-            return;
-        }
-
-        movementTarget = new Vector2(currentPatrolTarget.position.x, rb.position.y);
-
-        FlipTowards(movementTarget);
-        currentMoveSpeed = patrolSpeed;
-        ActualizarAnimacion(patrolSpeed, false);
-
-        if (Mathf.Abs(rb.position.x - movementTarget.x) <= pointReachDistance)
-        {
-            rb.position = new Vector2(movementTarget.x, rb.position.y);
-            currentMoveSpeed = 0f;
-            CambiarEstado(EstadoTengu.Esperando);
-
-            if (!waitingCoroutineRunning)
-                StartCoroutine(WaitAtPatrolPoint());
+            float speed = estadoActual == EstadoTengu.Persiguiendo ? chaseSpeed : patrolSpeed;
+            Vector2 nuevaPosicion = rb.position + new Vector2(moveDirectionX * speed * Time.fixedDeltaTime, 0f);
+            rb.MovePosition(nuevaPosicion);
         }
     }
 
-    IEnumerator WaitAtPatrolPoint()
+    // ---------------------------------------------------------------
+    // PATRULLA
+    // ---------------------------------------------------------------
+
+    void ActualizarPatrulla()
     {
-        waitingCoroutineRunning = true;
-        ActualizarAnimacion(0f, false);
-
-        float waitTime = Random.Range(waitTimeMin, waitTimeMax);
-        yield return new WaitForSeconds(waitTime);
-
-        currentPatrolTarget = currentPatrolTarget == patrolPointA ? patrolPointB : patrolPointA;
-        FlipTowards(currentPatrolTarget.position);
-
-        waitingCoroutineRunning = false;
-        CambiarEstado(EstadoTengu.Patrullando);
-    }
-
-    void PrepararPersecucion()
-    {
-        if (DebeBloquearseParaAtacar())
+        if (patrolPointA == null || patrolPointB == null || patrolTarget == null)
         {
-            currentMoveSpeed = 0f;
-            rb.linearVelocity = Vector2.zero;
-
-            ActualizarAnimacion(0f, true);
+            moveDirectionX = 0f;
             return;
         }
 
-        float desiredDistance = frontalMeleeLockDistance - 0.2f;
-
-        float targetX;
-
-        if (player.position.x > transform.position.x)
-            targetX = player.position.x - desiredDistance;
-        else
-            targetX = player.position.x + desiredDistance;
-
-        movementTarget = new Vector2(targetX, rb.position.y);
-
-        FlipTowards(player.position);
-
-        currentMoveSpeed = chaseSpeed;
-
-        ActualizarAnimacion(chaseSpeed, true);
-    }
-
-    void PrepararAtaque()
-    {
-        currentMoveSpeed = 0f;
-        rb.linearVelocity = Vector2.zero;
-        FlipTowards(player.position);
-        ActualizarAnimacion(0f, true);
-
-        bool canStartAttack =
-            DebeBloquearseParaAtacar() ||
-            EstaJugadorEnZonaDeAtaque() ||
-            JugadorMuyCercaFrontal() ||
-            JugadorEstaEncima();
-
-        if (!canStartAttack && !attackDamagePending)
-            return;
-
-        if (!attackDamagePending && Time.time >= lastAttackTime + attackCooldown)
+        if (isWaiting)
         {
-            lastAttackTime = Time.time;
-            attackStopTimer = attackStopTime;
-            attackDamagePending = true;
-            attackDamageMoment = Time.time + 0.08f;
-
-            if (animator != null)
-                animator.SetTrigger("Attack");
-        }
-    }
-
-    void ResolverImpactoPendiente()
-    {
-        attackDamagePending = false;
-
-        KitsuneController kitsuneController = player.GetComponent<KitsuneController>();
-        if (kitsuneController == null)
-            kitsuneController = player.GetComponentInParent<KitsuneController>();
-
-        if (kitsuneController != null && kitsuneController.IsInvisible)
-            return;
-
-        KitsuneHealth kitsuneHealth = ObtenerKitsuneHealth();
-        if (kitsuneHealth == null || kitsuneHealth.IsDead)
-            return;
-
-        bool puedeConectar =
-            DebeBloquearseParaAtacar() ||
-            EstaJugadorEnRangoExtendidoDeGolpe() ||
-            JugadorMuyCercaFrontal() ||
-            JugadorEstaEncima();
-
-        if (!puedeConectar)
-            return;
-
-        float damageToApply = JugadorEstaEncima() ? arribaDamage : frontalDamage;
-        kitsuneHealth.TakeDamage(damageToApply);
-
-        if (debugLogs)
-            Debug.Log("[Tengu] Ataque conectado. Da�o: " + damageToApply);
-    }
-
-    void PrepararRegreso()
-    {
-        Transform nearestPoint = ObtenerPuntoPatrullaMasCercano();
-        if (nearestPoint == null)
-        {
-            CambiarEstado(EstadoTengu.Patrullando);
+            moveDirectionX = 0f;
+            waitTimer -= Time.deltaTime;
+            if (waitTimer <= 0f)
+            {
+                isWaiting = false;
+                patrolTarget = patrolTarget == patrolPointA ? patrolPointB : patrolPointA;
+                AplicarOrientacion(patrolTarget.position.x);
+            }
             return;
         }
 
-        movementTarget = new Vector2(nearestPoint.position.x, rb.position.y);
-        FlipTowards(movementTarget);
-        currentMoveSpeed = returnSpeed;
-        ActualizarAnimacion(returnSpeed, false);
+        float diferenciaX = patrolTarget.position.x - transform.position.x;
 
-        if (Mathf.Abs(rb.position.x - movementTarget.x) <= pointReachDistance)
+        if (Mathf.Abs(diferenciaX) <= pointReachDistance)
         {
-            rb.position = new Vector2(movementTarget.x, rb.position.y);
-            currentPatrolTarget = nearestPoint == patrolPointA ? patrolPointB : patrolPointA;
-            CambiarEstado(EstadoTengu.Esperando);
-
-            if (!waitingCoroutineRunning)
-                StartCoroutine(WaitAtPatrolPoint());
+            isWaiting = true;
+            waitTimer = waitTimeAtPoint;
+            moveDirectionX = 0f;
+            return;
         }
+
+        moveDirectionX = Mathf.Sign(diferenciaX);
+        AplicarOrientacion(patrolTarget.position.x);
     }
 
-    float AlturaCombateTengu()
+    void VolverAPatrullaMasCercana()
     {
-        return transform.position.y + combatHeightOffset;
+        if (patrolPointA == null || patrolPointB == null) return;
+
+        float distA = Mathf.Abs(transform.position.x - patrolPointA.position.x);
+        float distB = Mathf.Abs(transform.position.x - patrolPointB.position.x);
+
+        patrolTarget = distA <= distB ? patrolPointA : patrolPointB;
+        isWaiting = false;
     }
 
-    bool DebeBloquearseParaAtacar()
+    // ---------------------------------------------------------------
+    // PERSECUCIÓN
+    // ---------------------------------------------------------------
+
+    void ActualizarPersecucion()
     {
-        if (player == null) return false;
-
-        float dx = Mathf.Abs(player.position.x - transform.position.x);
-        float dy = Mathf.Abs(player.position.y - AlturaCombateTengu());
-
-        bool enfrente = JugadorEstaAlFrente();
-        bool cercaHorizontal = dx <= frontalMeleeLockDistance;
-        bool cercaVertical = dy <= 0.95f;
-
-        return enfrente && cercaHorizontal && cercaVertical;
+        float diferenciaX = player.position.x - transform.position.x;
+        moveDirectionX = Mathf.Sign(diferenciaX);
+        AplicarOrientacion(player.position.x);
     }
 
-    bool EstaJugadorEnZonaDeAtaque()
-    {
-        if (attackPoint == null || player == null) return false;
+    // ---------------------------------------------------------------
+    // ATAQUE
+    // ---------------------------------------------------------------
 
-        Vector2 center = attackPoint.position;
-        return Vector2.Distance(center, player.position) <= attackRadius;
+    void IntentarAtacar()
+    {
+        if (Time.time < lastAttackTime + attackCooldown)
+            return;
+
+        lastAttackTime = Time.time;
+
+        if (debugLogs) Debug.Log("[Tengu] Inicio de ataque.");
+
+        if (animator != null)
+            animator.SetTrigger("Attack");
+
+        // Daño inmediato y simple. Si tu animación de ataque tiene un
+        // frame de impacto claro, mové esta llamada a un Animation Event
+        // que invoque DealDamage() y borrá la línea de abajo.
+        DealDamage();
     }
 
-    bool EstaJugadorEnRangoExtendidoDeGolpe()
+    /// <summary>
+    /// Aplica daño si el jugador sigue en rango. Pública para poder
+    /// engancharse también desde un Animation Event.
+    /// </summary>
+    public void DealDamage()
     {
-        if (attackPoint == null || player == null) return false;
+        if (player == null)
+            return;
 
-        Vector2 center = attackPoint.position;
-        return Vector2.Distance(center, player.position) <= attackConnectRadius;
-    }
-
-    bool JugadorMuyCercaFrontal()
-    {
-        if (player == null) return false;
-
-        float dx = Mathf.Abs(player.position.x - transform.position.x);
-        float dy = Mathf.Abs(player.position.y - AlturaCombateTengu());
-
-        bool cercaHorizontal = dx <= frontalMeleeLockDistance;
-        bool cercaVertical = dy <= 0.95f;
-
-        return cercaHorizontal && cercaVertical;
-    }
-
-    bool JugadorEstaEncima()
-    {
-        if (player == null) return false;
-
-        float dx = Mathf.Abs(player.position.x - transform.position.x);
-        float dy = player.position.y - transform.position.y;
-
-        bool centradoEnX = dx <= 1.35f;
-        bool encimaEnY = dy > 0.45f && dy <= verticalDetectionHeight + 0.6f;
-
-        return centradoEnX && encimaEnY;
-    }
-
-    KitsuneHealth ObtenerKitsuneHealth()
-    {
-        if (player == null) return null;
+        if (!JugadorEnRangoDeAtaque())
+            return;
 
         KitsuneHealth kitsuneHealth = player.GetComponent<KitsuneHealth>();
+
         if (kitsuneHealth == null)
             kitsuneHealth = player.GetComponentInParent<KitsuneHealth>();
+
         if (kitsuneHealth == null)
             kitsuneHealth = player.GetComponentInChildren<KitsuneHealth>();
 
-        return kitsuneHealth;
+        if (kitsuneHealth != null && !kitsuneHealth.IsDead)
+        {
+            kitsuneHealth.TakeDamage(attackDamage);
+
+            if (debugLogs) Debug.Log("[Tengu] DAÑO APLICADO");
+        }
     }
 
-    Transform ObtenerPuntoPatrullaMasCercano()
+    // ---------------------------------------------------------------
+    // DETECCIÓN (distancia horizontal pura + filtro de altura)
+    // ---------------------------------------------------------------
+
+    bool JugadorDetectado()
     {
-        if (patrolPointA == null) return patrolPointB;
-        if (patrolPointB == null) return patrolPointA;
+        if (player == null)
+            return false;
 
-        float distA = Mathf.Abs(rb.position.x - patrolPointA.position.x);
-        float distB = Mathf.Abs(rb.position.x - patrolPointB.position.x);
+        float altura = Mathf.Abs(transform.position.y - player.position.y);
+        float distanciaX = Mathf.Abs(transform.position.x - player.position.x);
 
-        return distA <= distB ? patrolPointA : patrolPointB;
+        return altura <= maxHeightDifference &&
+               distanciaX <= detectionRange;
     }
 
-    bool JugadorEstaAlFrente()
+    /// <summary>
+    /// Filtro de ataque INDEPENDIENTE del de detección. Usa su propia
+    /// tolerancia de altura (attackHeightTolerance), mucho más estricta
+    /// que maxHeightDifference, para que el Tengu solo golpee cuando el
+    /// jugador está realmente a su mismo nivel — no cuando salta y queda
+    /// a la altura de la cabeza pero dentro del rango "amplio" de detección.
+    /// </summary>
+    bool JugadorEnRangoDeAtaque()
     {
-        if (player == null) return false;
+        if (player == null)
+            return false;
 
-        float offsetX = player.position.x - transform.position.x;
+        float altura = Mathf.Abs(transform.position.y - player.position.y);
 
-        if (EstaMirandoDerecha())
-            return offsetX >= -0.45f;
-
-        return offsetX <= 0.45f;
+        return DistanciaHorizontalAlJugador() <= attackRange &&
+               altura <= attackHeightTolerance;
     }
 
-    bool EstaMirandoDerecha()
+    float DistanciaHorizontalAlJugador()
     {
-        if (graphics == null) return true;
-        return graphics.localScale.x > 0f;
+        if (player == null)
+            return 999f;
+
+        return Mathf.Abs(transform.position.x - player.position.x);
     }
 
-    void FlipTowards(Vector2 target)
+    // ---------------------------------------------------------------
+    // MOVIMIENTO / ORIENTACIÓN — funciones únicas, llamadas desde un
+    // solo lugar por frame en cada estado.
+    // ---------------------------------------------------------------
+
+    void DetenerMovimientoHorizontal()
     {
-        if (graphics == null) return;
-
-        Vector3 scale = graphics.localScale;
-
-        if (target.x < transform.position.x)
-            scale.x = -Mathf.Abs(scale.x);
-        else if (target.x > transform.position.x)
-            scale.x = Mathf.Abs(scale.x);
-
-        graphics.localScale = scale;
+        moveDirectionX = 0f;
+        if (rb != null)
+            rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
     }
 
-    void ActualizarAnimacion(float speedValue, bool isChasing)
+    void DetenerMovimientoCompleto()
     {
-        if (animator == null) return;
-
-        animator.SetBool("IsChasing", isChasing);
-        animator.SetFloat("Speed", speedValue);
+        moveDirectionX = 0f;
+        if (rb != null)
+            rb.linearVelocity = Vector2.zero;
     }
 
-    void CambiarEstado(EstadoTengu nuevoEstado)
+    void AplicarOrientacion(float targetX)
+    {
+        bool debeMirarDerecha = targetX > transform.position.x;
+
+        Vector3 escala = transform.localScale;
+
+        if (debeMirarDerecha)
+            escala.x = Mathf.Abs(escala.x);
+        else
+            escala.x = -Mathf.Abs(escala.x);
+
+        transform.localScale = escala;
+    }
+
+    // ---------------------------------------------------------------
+    // ESTADO / ANIMATOR
+    // ---------------------------------------------------------------
+
+    void CambiarEstado(EstadoTengu nuevoEstado, string razon)
     {
         if (estadoActual == nuevoEstado) return;
 
         if (debugLogs)
-            Debug.Log("[Tengu] Estado: " + estadoActual + " -> " + nuevoEstado);
+            Debug.Log("[Tengu] Estado: " + estadoActual + " -> " + nuevoEstado + " (" + razon + ")");
 
         estadoActual = nuevoEstado;
+
+        // Al cambiar de estado, jamás se arrastra movimiento del estado
+        // anterior: se limpia acá, en el único punto de transición.
+        if (nuevoEstado == EstadoTengu.Atacando)
+            DetenerMovimientoHorizontal();
+    }
+
+    void SincronizarAnimator()
+    {
+        if (animator == null) return;
+
+        bool isChasing = estadoActual == EstadoTengu.Persiguiendo || estadoActual == EstadoTengu.Atacando;
+        float speed = Mathf.Abs(moveDirectionX) * (estadoActual == EstadoTengu.Persiguiendo ? chaseSpeed : patrolSpeed);
+
+        animator.SetBool("IsChasing", isChasing);
+        animator.SetFloat("Speed", speed);
     }
 
     void OnDrawGizmosSelected()
     {
+        // Caja amarilla: zona de detección (amplia, tolera desnivel para perseguir)
         Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, detectionRange);
+        Gizmos.DrawWireCube(transform.position, new Vector3(detectionRange * 2f, maxHeightDifference * 2f, 0.1f));
 
-        Gizmos.color = Color.cyan;
-        Gizmos.DrawWireSphere(transform.position, closeDetectionRange);
-
-        Gizmos.color = Color.magenta;
-        Gizmos.DrawWireSphere(Application.isPlaying ? spawnPosition : (Vector2)transform.position, maxChaseDistanceFromOrigin);
-
-        if (attackPoint != null)
-        {
-            Gizmos.color = Color.red;
-            Gizmos.DrawWireSphere(attackPoint.position, attackRadius);
-
-            Gizmos.color = new Color(1f, 0.5f, 0f, 1f);
-            Gizmos.DrawWireSphere(attackPoint.position, attackConnectRadius);
-        }
-
-        Gizmos.color = Color.green;
-        Vector3 lockCenter = new Vector3(transform.position.x, AlturaCombateTengu(), transform.position.z);
-        Gizmos.DrawWireCube(lockCenter, new Vector3(frontalMeleeLockDistance * 2f, 1.9f, 0.1f));
-
-        Vector3 boxCenter = new Vector3(transform.position.x, AlturaCombateTengu(), transform.position.z);
-        Vector3 boxSize = new Vector3((closeDetectionRange + 0.25f) * 2f, verticalDetectionHeight * 2f, 0.1f);
-        Gizmos.color = Color.white;
-        Gizmos.DrawWireCube(boxCenter, boxSize);
+        // Caja roja: zona de ataque real (debe verse chata y ancha, no vertical)
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireCube(transform.position, new Vector3(attackRange * 2f, attackHeightTolerance * 2f, 0.1f));
     }
 }
