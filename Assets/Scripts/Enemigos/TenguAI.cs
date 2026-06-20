@@ -61,7 +61,7 @@ public class TenguAI : MonoBehaviour
     [SerializeField] private float attackDamage = 10f;
 
     [Header("Debug")]
-    [SerializeField] private bool debugLogs = true;
+    [SerializeField] private bool debugLogs = false; // <-- [MODIFICADO] Cambiado a false por defecto para eliminar el spam en la consola
 
     private EstadoTengu estadoActual = EstadoTengu.Patrullando;
 

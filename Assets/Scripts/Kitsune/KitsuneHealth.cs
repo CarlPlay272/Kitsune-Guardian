@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 using UnityEngine;
-using UnityEngine.SceneManagement; // OBLIGATORIO: Para poder recargar el nivel completo
+using UnityEngine.SceneManagement;
 
 public class KitsuneHealth : MonoBehaviour
 {
@@ -17,17 +17,24 @@ public class KitsuneHealth : MonoBehaviour
     [SerializeField] private string deathTag = "";
     [SerializeField] private float trapDamage = 999f;
 
-    [Header("Debug y Atrapado (GEMINI)")]
+    [Header("Debug General")]
     [SerializeField] private bool debugHealthKeysEnabled = false;
     [SerializeField] private KeyCode autoMuerteKey = KeyCode.R;
     [SerializeField] private KeyCode toggleDebugKey = KeyCode.F3;
-    [SerializeField] private KeyCode damageKey = KeyCode.J;
-    [SerializeField] private KeyCode healKey = KeyCode.K;
     [SerializeField] private float debugStep = 10f;
 
-    [Header("Nuevas Teclas Debug Power-Ups")]
-    [SerializeField] private KeyCode toggleInvisibilidadKey = KeyCode.U; // Tecla U para alternar Invisibilidad
-    [SerializeField] private KeyCode toggleDashKey = KeyCode.I;           // Tecla I para alternar Dash
+    [Header("Mapeo Invertido Fila Numérica (Carlos)")]
+    [SerializeField] private KeyCode menosCorazonKey = KeyCode.Alpha5;   
+    [SerializeField] private KeyCode masCorazonKey = KeyCode.Alpha6;     
+    [SerializeField] private KeyCode menosVidaKey = KeyCode.Alpha7;        
+    [SerializeField] private KeyCode masVidaKey = KeyCode.Alpha8;          
+    [SerializeField] private KeyCode menosEnergiaKey = KeyCode.Alpha9;   
+    [SerializeField] private KeyCode masEnergiaKey = KeyCode.Alpha0;     
+
+    [Header("Mapeo Habilidades QWERTY")]
+    [SerializeField] private KeyCode toggleDisparoKey = KeyCode.U;        
+    [SerializeField] private KeyCode toggleDashKey = KeyCode.I;           
+    [SerializeField] private KeyCode toggleInvisibilidadKey = KeyCode.O;  
 
     [Header("Configuración de Reinicio Total")]
     [Tooltip("Tiempo en segundos que se debe mantener presionada la R para reiniciar todo el nivel de cero.")]
@@ -35,7 +42,7 @@ public class KitsuneHealth : MonoBehaviour
 
     private bool isDead = false;
     private Vector3 spawnPosition;
-    private float temporizadorR = 0f; // Mide cuánto tiempo se mantiene presionada la tecla R
+    private float temporizadorR = 0f;
 
     public float MaxHealth => maxHealth;
     public float CurrentHealth => currentHealth;
@@ -47,7 +54,6 @@ public class KitsuneHealth : MonoBehaviour
         spawnPosition = transform.position;
 
         Debug.Log("KitsuneHealth cargado. Vida inicial: " + currentHealth);
-        Debug.Log("Punto de spawn inicial guardado en: " + spawnPosition);
     }
 
     void Update()
@@ -58,39 +64,64 @@ public class KitsuneHealth : MonoBehaviour
             Debug.Log("Modo debug de salud y habilidades: " + (debugHealthKeysEnabled ? "ACTIVADO" : "DESACTIVADO"));
         }
 
-        // BLOQUE DE COMANDOS DEL MODO DEBUG
         if (debugHealthKeysEnabled)
         {
-            if (Input.GetKeyDown(damageKey))
+            if (Input.GetKeyDown(menosCorazonKey) && GameController.Instance != null)
+            {
+                GameController.Instance.ModificarVidasDebug(-1);
+            }
+            if (Input.GetKeyDown(masCorazonKey) && GameController.Instance != null)
+            {
+                GameController.Instance.ModificarVidasDebug(1);
+            }
+
+            if (Input.GetKeyDown(menosVidaKey))
             {
                 TakeDamage(debugStep);
             }
-
-            if (Input.GetKeyDown(healKey))
+            if (Input.GetKeyDown(masVidaKey))
             {
                 Heal(debugStep);
             }
 
-            // 🔮 TRUCO CON LA U: Alternar el estado de la Invisibilidad
-            if (Input.GetKeyDown(toggleInvisibilidadKey) && GameController.Instance != null)
+            // CONTROL DE ENERGÍA (ESPÍRITU)
+            KitsuneSpirit spiritComp = GetComponentInParent<KitsuneSpirit>() ?? GetComponentInChildren<KitsuneSpirit>();
+            if (spiritComp != null)
             {
-                // Invertimos directamente el valor booleano en el GameController reflejando los cambios en el HUD
-                bool nuevoEstado = !GameController.Instance.InvisibilidadDesbloqueada;
-                GameController.Instance.DesbloquearInvisibilidadDebug(nuevoEstado);
-                Debug.Log("⚡ [DEBUG] Invisibilidad establecida en: " + nuevoEstado);
+                if (Input.GetKeyDown(menosEnergiaKey))
+                {
+                    spiritComp.ConsumeSpirit(debugStep);
+                    Debug.Log("⚡ [DEBUG] Energía disminuida. Actual: " + spiritComp.CurrentSpirit);
+                }
+                if (Input.GetKeyDown(masEnergiaKey))
+                {
+                    spiritComp.AddSpirit(debugStep);
+                    Debug.Log("⚡ [DEBUG] Energía aumentada. Actual: " + spiritComp.CurrentSpirit);
+                }
             }
 
-            // 💨 TRUCO CON LA I: Alternar el estado del Dash
+            if (Input.GetKeyDown(toggleDisparoKey) && GameController.Instance != null)
+            {
+                bool nuevoEstado = !GameController.Instance.DisparoDesbloqueado;
+                GameController.Instance.DesbloquearDisparoDebug(nuevoEstado);
+                Debug.Log("🔥 [DEBUG] Habilidad de Disparo establecida en: " + nuevoEstado);
+            }
+
             if (Input.GetKeyDown(toggleDashKey) && GameController.Instance != null)
             {
-                // Invertimos directamente el valor booleano en el GameController reflejando los cambios en el HUD
                 bool nuevoEstado = !GameController.Instance.DashDesbloqueado;
                 GameController.Instance.DesbloquearDashDebug(nuevoEstado);
-                Debug.Log("⚡ [DEBUG] Habilidad de Dash establecida en: " + nuevoEstado);
+                Debug.Log("💨 [DEBUG] Habilidad de Dash establecida en: " + nuevoEstado);
+            }
+
+            if (Input.GetKeyDown(toggleInvisibilidadKey) && GameController.Instance != null)
+            {
+                bool nuevoEstado = !GameController.Instance.InvisibilidadDesbloqueada;
+                GameController.Instance.DesbloquearInvisibilidadDebug(nuevoEstado);
+                Debug.Log("🔮 [DEBUG] Invisibilidad establecida en: " + nuevoEstado);
             }
         }
 
-        // LÓGICA DE REINICIO HÍBRIDA (PULSAR VS MANTENER R)
         if (!isDead)
         {
             if (Input.GetKey(autoMuerteKey))
@@ -99,7 +130,7 @@ public class KitsuneHealth : MonoBehaviour
 
                 if (temporizadorR >= tiempoParaReiniciarNivel)
                 {
-                    Debug.Log("Tecla " + autoMuerteKey + " mantenida por " + tiempoParaReiniciarNivel + "s. ¡Reiniciando nivel desde cero de forma absoluta!");
+                    Debug.Log("Reiniciando nivel desde cero de forma absoluta!");
                     ReiniciarNivelCompleto();
                 }
             }
@@ -108,10 +139,8 @@ public class KitsuneHealth : MonoBehaviour
             {
                 if (temporizadorR < tiempoParaReiniciarNivel && temporizadorR > 0.05f)
                 {
-                    Debug.Log("Kitsune atascado. Ejecutando botón de pánico espiritual rápido con la tecla: " + autoMuerteKey);
                     StartCoroutine(RespawnRoutine());
                 }
-
                 temporizadorR = 0f;
             }
         }
@@ -151,7 +180,6 @@ public class KitsuneHealth : MonoBehaviour
     public void RestoreFullHealth()
     {
         currentHealth = maxHealth;
-        Debug.Log("Vida restaurada al máximo: " + currentHealth);
     }
 
     private void OnTriggerEnter2D(Collider2D other)
@@ -185,17 +213,14 @@ public class KitsuneHealth : MonoBehaviour
         if (GameController.Instance != null)
         {
             transform.position = GameController.Instance.PuntoRetornoActual;
-            Debug.Log("Respawn exitoso en Checkpoint ID actual: " + GameController.Instance.CheckpointActualID + " | Posición: " + transform.position);
         }
         else if (respawnPoint != null)
         {
             transform.position = respawnPoint.position;
-            Debug.Log("Respawn en respawnPoint asignado: " + respawnPoint.position);
         }
         else
         {
             transform.position = spawnPosition;
-            Debug.Log("Respawn en spawn inicial guardado: " + spawnPosition);
         }
 
         Rigidbody2D rb = GetComponent<Rigidbody2D>();
@@ -211,6 +236,5 @@ public class KitsuneHealth : MonoBehaviour
         }
 
         isDead = false;
-        Debug.Log("Kitsune reapareció correctamente.");
     }
 }

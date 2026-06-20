@@ -9,15 +9,14 @@ public class Fireball : MonoBehaviour
     [Header("Daño")]
     [SerializeField] private int damage = 1;
 
-    private int direction = 1;
+    private Vector2 moveDirection = Vector2.right;
 
-    public void SetDirection(int dir)
+    public void SetDirection(Vector2 dir)
     {
-        direction = dir;
+        moveDirection = dir.normalized;
 
-        Vector3 scale = transform.localScale;
-        scale.x = Mathf.Abs(scale.x) * dir;
-        transform.localScale = scale;
+        float angle = Mathf.Atan2(moveDirection.y, moveDirection.x) * Mathf.Rad2Deg;
+        transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
     }
 
     private void Start()
@@ -28,8 +27,7 @@ public class Fireball : MonoBehaviour
     private void Update()
     {
         transform.Translate(
-            Vector2.right *
-            direction *
+            moveDirection *
             speed *
             Time.deltaTime,
             Space.World
@@ -38,20 +36,42 @@ public class Fireball : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        Debug.Log("Golpeó: " + other.name);
+        if (other.GetComponent<BossZoneTrigger>() != null || other.GetComponent<Fireball>() != null)
+        {
+            return;
+        }
 
-        TenguState tengu =
-            other.GetComponent<TenguState>();
+        Debug.Log("Fuego golpeó a: " + other.name);
 
-        if (tengu == null)
-            tengu = other.GetComponentInParent<TenguState>();
+        // ===============================================================
+        // DETECCIÓN EXTRA: PURIFICACIÓN DE BLOQUEOS DE VACÍO
+        // ===============================================================
+        CorruptionBlock bloqueCorrupto = other.GetComponent<CorruptionBlock>() ?? other.GetComponentInParent<CorruptionBlock>();
+        if (bloqueCorrupto != null)
+        {
+            bloqueCorrupto.DestruirBloqueo();
+            Destroy(gameObject); // El fueguito se extingue al purificar el bloque
+            return;
+        }
 
+        TenguState tengu = other.GetComponent<TenguState>() ?? other.GetComponentInParent<TenguState>();
         if (tengu != null)
         {
-            Debug.Log("Tengu encontrado");
-
             tengu.TakeHit(damage);
+            Destroy(gameObject);
+            return;
+        }
 
+        GhostHealth ghost = other.GetComponent<GhostHealth>() ?? other.GetComponentInParent<GhostHealth>();
+        if (ghost != null)
+        {
+            ghost.TakeHit(damage);
+            Destroy(gameObject);
+            return;
+        }
+
+        if (other.gameObject.layer == LayerMask.NameToLayer("Ground"))
+        {
             Destroy(gameObject);
             return;
         }

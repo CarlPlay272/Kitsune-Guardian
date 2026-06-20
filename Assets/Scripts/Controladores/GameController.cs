@@ -54,6 +54,7 @@ public class GameController : MonoBehaviour
     private static float cachedSpirit = -1f;
     private static bool cachedInvisibilidad = false;
     private static bool cachedDash = false;
+    private static bool cachedDisparo = false;
     private static bool vieneDeNivelAnterior = false;
 
     // Propiedades Públicas
@@ -74,7 +75,6 @@ public class GameController : MonoBehaviour
 
     void Awake()
     {
-        // SISTEMA SINGLETON CONTROLADO CON EVENTO DE ESCENAS
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
@@ -82,9 +82,8 @@ public class GameController : MonoBehaviour
         }
 
         Instance = this;
-        DontDestroyOnLoad(gameObject); // El controlador se vuelve eterno
+        DontDestroyOnLoad(gameObject);
 
-        // Suscribirse al evento de carga de escena de Unity para inyectar datos al nuevo mapa
         SceneManager.sceneLoaded += OnSceneLoaded;
 
         InicializarDatosNivel();
@@ -92,7 +91,6 @@ public class GameController : MonoBehaviour
 
     void OnDestroy()
     {
-        // Desuscripción obligatoria para evitar fugas de memoria
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
@@ -101,7 +99,6 @@ public class GameController : MonoBehaviour
         if (gameOverPanel != null)
             gameOverPanel.SetActive(false);
 
-        // Si es la primera vez que arranca el juego completo
         if (!vieneDeNivelAnterior)
         {
             vidasActuales = vidasIniciales;
@@ -113,13 +110,12 @@ public class GameController : MonoBehaviour
         }
         else
         {
-            // Inyectar la data del nivel anterior guardada en el caché estático
             vidasActuales = cachedVidas;
             puntosActuales = cachedPuntos;
             invisibilidadDesbloqueada = cachedInvisibilidad;
             dashDesbloqueado = cachedDash;
+            disparoDesbloqueado = cachedDisparo;
 
-            // Buscar y actualizar al nuevo Kitsune de esta escena
             ActualizarNuevoPlayerInstanciado();
         }
 
@@ -128,7 +124,6 @@ public class GameController : MonoBehaviour
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        // Volver a buscar las referencias de UI del nuevo nivel cargado ya que las viejas se destruyeron
         vidasText = GameObject.Find("VidasText")?.GetComponent<TMP_Text>();
         puntosText = GameObject.Find("PuntosText")?.GetComponent<TMP_Text>();
         gameOverPanel = GameObject.Find("GameOverPanel");
@@ -142,7 +137,6 @@ public class GameController : MonoBehaviour
 
         if (gameOverPanel != null) gameOverPanel.SetActive(false);
 
-        // Reconfigurar los estados visuales en el nuevo mapa
         if (colaHUD1 != null) colaHUD1.SetActive(invisibilidadDesbloqueada);
         if (colaHUD2 != null) colaHUD2.SetActive(dashDesbloqueado);
 
@@ -155,11 +149,10 @@ public class GameController : MonoBehaviour
 
         if (player != null)
         {
-            // 1. BLINDAJE DE FÍSICAS Y RENDERER (Evita que el zorro aparezca tiezo o invisible)
             Rigidbody2D rb = player.GetComponent<Rigidbody2D>();
             if (rb != null)
             {
-                rb.bodyType = RigidbodyType2D.Dynamic; // Forzar a dinámico para devolver el control físico
+                rb.bodyType = RigidbodyType2D.Dynamic;
                 rb.linearVelocity = Vector2.zero;
                 rb.angularVelocity = 0f;
             }
@@ -167,12 +160,11 @@ public class GameController : MonoBehaviour
             SpriteRenderer sr = player.GetComponentInChildren<SpriteRenderer>();
             if (sr != null)
             {
-                sr.enabled = true; // Forzar el encendido visual del sprite en la nueva escena
+                sr.enabled = true;
             }
 
             string escenaNombre = SceneManager.GetActiveScene().name;
 
-            // 2. ENLAZADO DINÁMICO DE SPAWNS MEDIANTE GAME OBJECTS EXACTOS (GEMINI)
             if (escenaNombre == "Nivel_1")
             {
                 GameObject puntoDestino1 = GameObject.Find("DestinoPortal_Mapa1");
@@ -180,7 +172,6 @@ public class GameController : MonoBehaviour
                 {
                     player.transform.position = puntoDestino1.transform.position;
                     puntoRetornoActual = puntoDestino1.transform.position;
-                    Debug.Log("↩️ [BACKTRACKING] Kitsune llevado con éxito a: DestinoPortal_Mapa1");
                 }
                 else
                 {
@@ -194,7 +185,6 @@ public class GameController : MonoBehaviour
                 {
                     player.transform.position = puntoDestino2.transform.position;
                     puntoRetornoActual = puntoDestino2.transform.position;
-                    Debug.Log("🚀 [AVANCE] Kitsune llevado con éxito a: DestinoPortal_Mapa2");
                 }
                 else
                 {
@@ -206,7 +196,6 @@ public class GameController : MonoBehaviour
                 puntoRetornoActual = player.transform.position;
             }
 
-            // Inyectar Vida guardada
             KitsuneHealth healthComp = player.GetComponentInParent<KitsuneHealth>();
             if (healthComp != null && cachedHealth > 0)
             {
@@ -215,11 +204,19 @@ public class GameController : MonoBehaviour
                 healthComp.TakeDamage(danioAplicar);
             }
 
-            // Inyectar Energía/Espíritu guardado
             KitsuneSpirit spiritComp = player.GetComponentInParent<KitsuneSpirit>();
             if (spiritComp != null && cachedSpirit > 0)
             {
                 spiritComp.CurrentSpirit = cachedSpirit;
+            }
+
+            // ===============================================================
+            // 💥 [PARCHE DIRECTO] Sincronizar el disparo al clon del Nivel 2
+            // ===============================================================
+            KitsuneController controllerComp = player.GetComponent<KitsuneController>();
+            if (controllerComp != null)
+            {
+                Debug.Log("🔥 [SINCRO] Persistencia del disparo inyectada con éxito: " + disparoDesbloqueado);
             }
         }
     }
@@ -231,6 +228,7 @@ public class GameController : MonoBehaviour
         cachedPuntos = puntosActuales;
         cachedInvisibilidad = invisibilidadDesbloqueada;
         cachedDash = dashDesbloqueado;
+        cachedDisparo = disparoDesbloqueado;
 
         if (player != null)
         {
@@ -286,27 +284,19 @@ public class GameController : MonoBehaviour
 
     public void DesbloquearDisparo()
     {
-        if (disparoDesbloqueado)
-            return;
-
+        if (disparoDesbloqueado) return;
         disparoDesbloqueado = true;
-
         Debug.Log("Disparo desbloqueado");
     }
 
     public void PurificarBosqueSagrado()
     {
         if (bosquePurificado) return;
-
         bosquePurificado = true;
-
         if (contenedorCorrupcion != null)
         {
             contenedorCorrupcion.SetActive(false);
         }
-
-        // ❌ Dash eliminado para Nivel 1
-        // Se desbloqueará en Nivel 2 mediante otro evento
     }
 
     public void ActivarPlataformaSalto()
@@ -332,6 +322,23 @@ public class GameController : MonoBehaviour
     private void ActivarGameOver()
     {
         if (gameOverPanel != null) gameOverPanel.SetActive(true);
+    }
+
+    // ===============================================================
+    // BLOQUE DE MÉTODOS DE CONTROL PARA EL TECLADO DEBUG (CARLOS)
+    // ===============================================================
+
+    public void ModificarVidasDebug(int cantidad)
+    {
+        vidasActuales += cantidad;
+        if (vidasActuales < 0) vidasActuales = 0;
+        ActualizarUI();
+        Debug.Log("❤️ [DEBUG] Vidas/Corazones modificados en " + cantidad + ". Total: " + vidasActuales);
+    }
+
+    public void DesbloquearDisparoDebug(bool estado)
+    {
+        disparoDesbloqueado = estado;
     }
 
     public void DesbloquearInvisibilidadDebug(bool estado)

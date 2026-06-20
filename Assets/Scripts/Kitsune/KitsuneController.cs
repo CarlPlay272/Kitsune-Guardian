@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 
 public class KitsuneController : MonoBehaviour
@@ -37,14 +37,15 @@ public class KitsuneController : MonoBehaviour
     [SerializeField] private Animator animator;
     [SerializeField] private Rigidbody2D rb;
 
-    [Header("Disparo")]
+    [Header("Disparo (Mecánica Cuphead 8-Dirs)")]
     [SerializeField] private GameObject fireballPrefab;
     [SerializeField] private Transform shootPoint;
     [SerializeField] private KeyCode shootKey = KeyCode.J;
+    [SerializeField] private KeyCode lockMovementKey = KeyCode.LeftControl; // Ctrl para quedarse estático
     [SerializeField] private float shootCooldown = 0.15f;
     [SerializeField] private float spiritCostPerShot = 1f;
 
-    [Header("Recuperaci�n Esp�ritu")]
+    [Header("Recuperación Espíritu")]
     [SerializeField] private float spiritRecoveryInterval = 5f;
     [SerializeField] private float spiritRecoveryAmount = 2f;
 
@@ -58,6 +59,7 @@ public class KitsuneController : MonoBehaviour
     private bool facingRight = true;
     private bool isInWater = false;
     private bool controlBloqueado = false;
+    private bool isMovementLocked = false; // Flag del modo estático
 
     private bool isInvisible = false;
     private bool invisibilityOnCooldown = false;
@@ -69,6 +71,7 @@ public class KitsuneController : MonoBehaviour
     private float lastTapRightTime = -999f;
     private int dashDirection = 0;
     private bool dashDamageApplied = false;
+    private bool ghostDashDamageApplied = false; // Flag estricta para golpear solo a una fantasma por Dash
 
     private SpriteRenderer[] spriteRenderers;
     private Collider2D[] playerColliders;
@@ -99,14 +102,26 @@ public class KitsuneController : MonoBehaviour
 
     void Update()
     {
-        if (!controlBloqueado)
+        // Activa el modo estático si sostienes Ctrl
+        isMovementLocked = Input.GetKey(lockMovementKey);
+
+        if (!controlBloqueado && !isMovementLocked)
             moveInput = Input.GetAxisRaw("Horizontal");
         else
             moveInput = 0f;
 
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
 
-        if (!controlBloqueado && !isDashing && Input.GetButtonDown("Jump"))
+        // Voltear sprite con A/D estando quieto en Ctrl
+        if (isMovementLocked && !controlBloqueado && !isDashing)
+        {
+            if (Input.GetKeyDown(KeyCode.D) && !facingRight)
+                Flip();
+            else if (Input.GetKeyDown(KeyCode.A) && facingRight)
+                Flip();
+        }
+
+        if (!controlBloqueado && !isDashing && Input.GetButtonDown("Jump") && !isMovementLocked)
         {
             if (isInWater)
             {
@@ -134,7 +149,7 @@ public class KitsuneController : MonoBehaviour
             DesactivarInvisibilidad();
         }
 
-        if (!controlBloqueado && !isDashing)
+        if (!controlBloqueado && !isDashing && !isMovementLocked)
         {
             if (moveInput > 0 && !facingRight)
                 Flip();
@@ -144,7 +159,7 @@ public class KitsuneController : MonoBehaviour
 
         if (animator != null)
         {
-            animator.SetFloat("Speed", Mathf.Abs(moveInput));
+            animator.SetFloat("Speed", isMovementLocked ? 0f : Mathf.Abs(moveInput));
             animator.SetBool("IsGrounded", isGrounded);
         }
     }
@@ -180,7 +195,7 @@ public class KitsuneController : MonoBehaviour
 
         if (!kitsuneSpirit.ConsumeSpirit(spiritCostPerShot))
         {
-            Debug.Log("Sin esp�ritu suficiente");
+            Debug.Log("Sin espíritu suficiente");
             return;
         }
 
@@ -191,23 +206,53 @@ public class KitsuneController : MonoBehaviour
 
         nextShootTime = Time.time + shootCooldown;
 
+        // ===============================================================
+        // SISTEMA DE APUNTADO EN 8 DIRECCIONES (CUPHEAD STYLE)
+        // ===============================================================
+        Vector2 direccionDisparo = facingRight ? Vector2.right : Vector2.left;
+
+        float vertical = 0f;
+        if (Input.GetKey(KeyCode.W)) vertical = 1f;  // Arriba
+        if (Input.GetKey(KeyCode.S)) vertical = -1f; // Abajo
+
+        float horizontal = 0f;
+        if (Input.GetKey(KeyCode.D)) horizontal = 1f;   // Derecha
+        if (Input.GetKey(KeyCode.A)) horizontal = -1f;  // Izquierda
+
+        // Si se está presionando una dirección vertical, recalculamos el vector
+        if (vertical != 0f)
+        {
+            // Si además se presiona izquierda o derecha, se vuelve diagonal
+            if (horizontal != 0f)
+            {
+                direccionDisparo = new Vector2(horizontal, vertical).normalized;
+            }
+            else
+            {
+                // Si no hay input horizontal, dispara vertical puro (Arriba o Abajo)
+                direccionDisparo = new Vector2(0f, vertical);
+            }
+        }
+        else if (isMovementLocked && horizontal != 0f)
+        {
+            // Si está en Ctrl y solo presiona horizontal, respeta esa dirección
+            direccionDisparo = new Vector2(horizontal, 0f);
+        }
+
         GameObject fireball = Instantiate(
             fireballPrefab,
             shootPoint.position,
             Quaternion.identity
         );
 
-        Fireball fireballScript =
-            fireball.GetComponent<Fireball>();
+        Fireball fireballScript = fireball.GetComponent<Fireball>();
 
         if (fireballScript != null)
         {
-            fireballScript.SetDirection(
-                facingRight ? 1 : -1
-            );
+            fireballScript.SetDirection(direccionDisparo);
         }
 
-        Debug.Log("Disparo realizado");
+        Debug.Log("Disparo realizado en dirección: " + direccionDisparo);
     }
 
     void RecuperarEspirituInvisible()
@@ -236,7 +281,9 @@ public class KitsuneController : MonoBehaviour
         float currentSpeed = isInWater ? waterMoveSpeed : moveSpeed;
 
         Vector2 velocity = rb.linearVelocity;
-        velocity.x = moveInput * currentSpeed;
+
+        // Si está apuntando con Ctrl, la velocidad horizontal se clava a cero
+        velocity.x = isMovementLocked ? 0f : moveInput * currentSpeed;
 
         if (isInWater && velocity.y < maxFallSpeedInWater)
             velocity.y = maxFallSpeedInWater;
@@ -304,7 +351,7 @@ public class KitsuneController : MonoBehaviour
     {
         if (GameController.Instance == null) return;
         if (!GameController.Instance.DashDesbloqueado) return;
-        if (isDashing || dashOnCooldown || controlBloqueado) return;
+        if (isDashing || dashOnCooldown || controlBloqueado || isMovementLocked) return;
 
         if (Input.GetKeyDown(KeyCode.A))
         {
@@ -342,6 +389,7 @@ public class KitsuneController : MonoBehaviour
         dashOnCooldown = true;
         dashDirection = direction;
         dashDamageApplied = false;
+        ghostDashDamageApplied = false; // Limpia el candado al empezar la carrera
         controlBloqueado = true;
 
         if (direction > 0 && !facingRight)
@@ -364,6 +412,7 @@ public class KitsuneController : MonoBehaviour
             rb.linearVelocity = new Vector2(direction * dashSpeed, 0f);
 
             IntentarDanarTenguConDash(direction);
+            IntentarDanarFantasmaConDash(); // Ejecuta el ataque contra las fantasmas lentas
 
             yield return null;
         }
@@ -413,6 +462,7 @@ public class KitsuneController : MonoBehaviour
             else
                 golpePorEspalda = transform.position.x > tengu.transform.position.x;
 
+            // CORREGIDO: Se repara el error de sintaxis ortográfica aquí
             bool dashVaHaciaElTengu =
                 (direction == 1 && transform.position.x <= tengu.transform.position.x + 0.5f) ||
                 (direction == -1 && transform.position.x >= tengu.transform.position.x - 0.5f);
@@ -421,7 +471,34 @@ public class KitsuneController : MonoBehaviour
             {
                 tenguState.TakeHit(1);
                 dashDamageApplied = true;
-                Debug.Log("�Dash por retaguardia conectado al Tengu!");
+                Debug.Log("¡Dash por retaguardia conectado al Tengu!");
+                return;
+            }
+        }
+    }
+
+    // ===============================================================
+    // MECÁNICA DE EMERGENCIA: ATACA SOLAMENTE A UNA FANTASMA POR DASH
+    // ===============================================================
+    void IntentarDanarFantasmaConDash()
+    {
+        if (!isDashing || ghostDashDamageApplied) return;
+
+        ZoneBossGhostAI[] fantasmas = Object.FindObjectsByType<ZoneBossGhostAI>(FindObjectsSortMode.None);
+        foreach (ZoneBossGhostAI ghost in fantasmas)
+        {
+            if (ghost == null) continue;
+
+            GhostHealth health = ghost.GetComponent<GhostHealth>();
+            if (health == null || health.IsDead) continue;
+
+            float distancia = Vector2.Distance(transform.position, ghost.transform.position);
+
+            if (distancia <= dashHitRange)
+            {
+                health.TakeHit(1); // Le descuenta vida de emergencia
+                ghostDashDamageApplied = true; // Bloquea el daño en esta carrera
+                Debug.Log("💥 [DASH] Ataque de emergencia conectado con éxito a una sola fantasma.");
                 return;
             }
         }
@@ -528,5 +605,4 @@ public class KitsuneController : MonoBehaviour
     {
         controlBloqueado = false;
     }
-
 }
