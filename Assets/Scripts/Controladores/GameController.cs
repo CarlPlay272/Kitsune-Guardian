@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using TMPro;
 using UnityEngine.SceneManagement;
+using System.Collections.Generic;
 
 public class GameController : MonoBehaviour
 {
@@ -25,7 +26,9 @@ public class GameController : MonoBehaviour
 
     [Header("Purificación")]
     [SerializeField] private GameObject contenedorCorrupcion;
-    [SerializeField] private bool bosquePurificado = false;
+
+    private Dictionary<string, bool> purificacionPorEscena =
+        new Dictionary<string, bool>();
 
     [Header("Plataforma de salto")]
     [SerializeField] private GameObject humosSalto;
@@ -63,7 +66,18 @@ public class GameController : MonoBehaviour
     public float LimiteDerecho => limiteDerecho != null ? limiteDerecho.position.x : 0f;
     public int VidasActuales => vidasActuales;
     public int PuntosActuales => puntosActuales;
-    public bool BosquePurificado => bosquePurificado;
+    public bool BosquePurificado
+    {
+        get
+        {
+            string escena = SceneManager.GetActiveScene().name;
+
+            return purificacionPorEscena.TryGetValue(
+                escena,
+                out bool purificado
+            ) && purificado;
+        }
+    }
     public bool TieneLlave => tieneLlave;
     public bool InvisibilidadDesbloqueada => invisibilidadDesbloqueada;
     public bool DashDesbloqueado => dashDesbloqueado;
@@ -139,6 +153,13 @@ public class GameController : MonoBehaviour
 
         if (colaHUD1 != null) colaHUD1.SetActive(invisibilidadDesbloqueada);
         if (colaHUD2 != null) colaHUD2.SetActive(dashDesbloqueado);
+
+        contenedorCorrupcion = GameObject.Find("ContenedorCorrupcion");
+
+        if (contenedorCorrupcion != null && BosquePurificado)
+        {
+            contenedorCorrupcion.SetActive(false);
+        }
 
         InicializarDatosNivel();
     }
@@ -291,12 +312,23 @@ public class GameController : MonoBehaviour
 
     public void PurificarBosqueSagrado()
     {
-        if (bosquePurificado) return;
-        bosquePurificado = true;
-        if (contenedorCorrupcion != null)
+        string escenaActual = SceneManager.GetActiveScene().name;
+
+        if (purificacionPorEscena.TryGetValue(
+                escenaActual,
+                out bool yaPurificado)
+            && yaPurificado)
         {
-            contenedorCorrupcion.SetActive(false);
+            Debug.Log("YA ESTABA PURIFICADO EN " + escenaActual);
+            return;
         }
+
+        purificacionPorEscena[escenaActual] = true;
+
+        Debug.Log("PURIFICANDO " + escenaActual);
+
+        if (contenedorCorrupcion != null)
+            contenedorCorrupcion.SetActive(false);
     }
 
     public void ActivarPlataformaSalto()
