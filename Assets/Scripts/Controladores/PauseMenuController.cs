@@ -60,9 +60,22 @@ public class PauseMenuController : MonoBehaviour
 
     private void BuscarReferenciasPaneles()
     {
-        GameObject hudObj = GameObject.Find("HUD");
+        // 🔥 SOLUCIÓN BLINDADA: Escanea todos los Canvas de la escena para encontrar el HUD, sin importar su jerarquía
+        Canvas[] todosLosCanvas = Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None);
+        GameObject hudObj = null;
+
+        foreach (Canvas canvas in todosLosCanvas)
+        {
+            if (canvas.name == "HUD")
+            {
+                hudObj = canvas.gameObject;
+                break;
+            }
+        }
+
         if (hudObj != null)
         {
+            // transform.Find encuentra los subpaneles aunque estén ocultos o anidados
             Transform panelPausaTransform = hudObj.transform.Find("PanelPausa");
             if (panelPausaTransform != null)
             {
@@ -137,12 +150,10 @@ public class PauseMenuController : MonoBehaviour
 
         isPaused = true;
 
-        // 🔥 SOLUCIÓN DEL BUG: Escaneo dinámico forzado en el microsegundo exacto de la pausa
+        // Escaneo dinámico forzado en el microsegundo exacto de la pausa
         IntroduccionInicio introActiva = Object.FindFirstObjectByType<IntroduccionInicio>();
         if (introActiva != null)
         {
-            // Si el objeto de introducción existe, comprobamos si el texto se está mostrando en pantalla
-            // Como destruyes el objeto al terminar la rutina, su sola presencia significa que está corriendo
             bloqueadoPorDialogo = true;
             Debug.Log("💬 [HISTORIA] Texto de Naya detectado al pausar por primera vez. Controles protegidos.");
         }
@@ -172,8 +183,6 @@ public class PauseMenuController : MonoBehaviour
         // APLICACIÓN DEL CANDADO INTELIGENTE
         if (bloqueadoPorDialogo)
         {
-            // Si la pausa ocurrió durante la historia, NO le devolvemos el movimiento.
-            // Dejamos que IntroduccionInicio.cs se encargue de liberarlo cuando termine el Fade out.
             Debug.Log("💬 [HISTORIA] Menú cerrado. El Kitsune permanece inmóvil hasta terminar de leer.");
         }
         else
@@ -198,7 +207,19 @@ public class PauseMenuController : MonoBehaviour
         isPaused = false;
         bloqueadoPorDialogo = false;
         AsegurarEstadosPaneles(false);
-        CargarEscenaConTransicion("Nivel_1");
+
+        Debug.Log("🔄 [REINICIO] Solicitando carga asíncrona mística al LoadingManager para el Nivel_1.");
+
+        // 🔥 MODIFICACIÓN: Conexión con el nuevo flujo de carga asíncrona con desvanecido
+        if (LoadingManager.Instance != null)
+        {
+            LoadingManager.Instance.CambiarEscenaMistica("Nivel_1");
+        }
+        else
+        {
+            // Respaldo por si se prueba la interfaz de forma aislada
+            SceneManager.LoadScene("Nivel_1");
+        }
     }
 
     public void AbrirControlesOpciones()
@@ -216,24 +237,10 @@ public class PauseMenuController : MonoBehaviour
     public void SalirDelJuego()
     {
 #if UNITY_EDITOR
-            UnityEditor.EditorApplication.isPlaying = false;
+        UnityEditor.EditorApplication.isPlaying = false;
 #else
         Application.Quit();
 #endif
-    }
-
-    public void CargarEscenaConTransicion(string nombreEscena)
-    {
-        StartCoroutine(CargaRutina(nombreEscena));
-    }
-
-    private System.Collections.IEnumerator CargaRutina(string nombreEscena)
-    {
-        if (loadingPanel != null) loadingPanel.SetActive(true);
-        yield return new WaitForSecondsRealtime(1.5f);
-        AsyncOperation operacion = SceneManager.LoadSceneAsync(nombreEscena);
-        while (!operacion.isDone) { yield return null; }
-        if (loadingPanel != null) loadingPanel.SetActive(false);
     }
 
     private void BloquearKitsune(bool bloquear)
