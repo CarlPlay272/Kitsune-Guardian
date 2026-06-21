@@ -1,0 +1,1238 @@
+fileFormatVersion: 2
+guid: 49458305fb21aea4493ac3f38aa4f1d6
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -8480811610595081763
+    second: "32x32 Pixel UI Icons \u2013 Game Interface Pack_0"
+  - first:
+      213: -3836740358884350206
+    second: "32x32 Pixel UI Icons \u2013 Game Interface Pack_1"
+  - first:
+      213: 7626471514540516228
+    second: "32x32 Pixel UI Icons \u2013 Game Interface Pack_2"
+  - first:
+      213: -8416894437831260252
+    second: "32x32 Pixel UI Icons \u2013 Game Interface Pack_3"
+  - first:
+      213: -8265450506451573211
+    second: "32x32 Pixel UI Icons \u2013 Game Interface Pack_4"
+  - first:
+      213: -7931235484785400878
+    second: "32x32 Pixel UI Icons \u2013 Game Interface Pack_5"
+  - first:
+      213: 2199259604056325391
+    second: "32x32 Pixel UI Icons \u2013 Game Interface Pack_6"
+  - first:
+      213: -3167655378480752690
+    second: "32x32 Pixel UI Icons \u2013 Game Interface Pack_7"
+  - first:
+      213: -5154980742689865808
+    second: "32x32 Pixel UI Icons \u2013 Game Interface Pack_8"
+  - first:
+      213: 4224335337140427759
+    second: "32x32 Pixel UI Icons \u2013 Game Interface Pack_9"
+  - first:
+      213: -49281761369569456
+    second: "32x32 Pixel UI Icons \u2013 Game Interface Pack_10"
+  - first:
+      213: 7012120536646784974
+    second: "32x32 Pixel UI Icons \u2013 Game Interface Pack_11"
+  - first:
+      213: 6595768801397467914
+    second: "32x32 Pixel UI Icons \u2013 Game Interface Pack_12"
+  - first:
+      213: 5656030286400765881
+    second: "32x32 Pixel UI Icons \u2013 Game Interface Pack_13"
+  - first:
+      213: 5911679338045905986
+    second: "32x32 Pixel UI Icons \u2013 Game Interface Pack_14"
+  - first:
+      213: -4422826576970171326
+    second: "32x32 Pixel UI Icons \u2013 Game Interface Pack_15"
+  - first:
+      213: -8220032115488003183
+    second: "32x32 Pixel UI Icons \u2013 Game Interface Pack_16"
+  - first:
+      213: -3943574707038536549
+    second: "32x32 Pixel UI Icons \u2013 Game Interface Pack_17"
+  - first:
+      213: 5286100842090240974
+    second: "32x32 Pixel UI Icons \u2013 Game Interface Pack_18"
+  - first:
+      213: 2306647940516264808
+    second: "32x32 Pixel UI Icons \u2013 Game Interface Pack_19"
+  - first:
+      213: -8706448491437677106
+    second: "32x32 Pixel UI Icons \u2013 Game Interface Pack_20"
+  - first:
+      213: -7286165139327366650
+    second: "32x32 Pixel UI Icons \u2013 Game Interface Pack_21"
+  - first:
+      213: -7095087286721839641
+    second: "32x32 Pixel UI Icons \u2013 Game Interface Pack_22"
+  - first:
+      213: 4091091521515815138
+    second: "32x32 Pixel UI Icons \u2013 Game Interface Pack_23"
+  - first:
+      213: -3819747286470776308
+    second: "32x32 Pixel UI Icons \u2013 Game Interface Pack_24"
+  - first:
+      213: 2915315257248347431
+    second: "32x32 Pixel UI Icons \u2013 Game Interface Pack_25"
+  - first:
+      213: 6397709110250926271
+    second: "32x32 Pixel UI Icons \u2013 Game Interface Pack_26"
+  - first:
+      213: -1623464454859935780
+    second: "32x32 Pixel UI Icons \u2013 Game Interface Pack_27"
+  - first:
+      213: -4207642895422308983
+    second: "32x32 Pixel UI Icons \u2013 Game Interface Pack_28"
+  - first:
+      213: 4248889303802869792
+    second: "32x32 Pixel UI Icons \u2013 Game Interface Pack_29"
+  - first:
+      213: 3354224110670673774
+    second: "32x32 Pixel UI Icons \u2013 Game Interface Pack_30"
+  - first:
+      213: 4968231124050141190
+    second: "32x32 Pixel UI Icons \u2013 Game Interface Pack_31"
+  - first:
+      213: -8986819582533702001
+    second: "32x32 Pixel UI Icons \u2013 Game Interface Pack_32"
+  - first:
+      213: -5709701844806373380
+    second: "32x32 Pixel UI Icons \u2013 Game Interface Pack_33"
+  - first:
+      213: 2223051973708330600
+    second: "32x32 Pixel UI Icons \u2013 Game Interface Pack_34"
+  - first:
+      213: 3719303282470794040
+    second: "32x32 Pixel UI Icons \u2013 Game Interface Pack_35"
+  - first:
+      213: 6429771647839723299
+    second: "32x32 Pixel UI Icons \u2013 Game Interface Pack_36"
+  - first:
+      213: 7180799508384666942
+    second: "32x32 Pixel UI Icons \u2013 Game Interface Pack_37"
+  - first:
+      213: -1898123936134999027
+    second: "32x32 Pixel UI Icons \u2013 Game Interface Pack_38"
+  - first:
+      213: 4839144916157869962
+    second: "32x32 Pixel UI Icons \u2013 Game Interface Pack_39"
+  - first:
+      213: -3000119971098873100
+    second: "32x32 Pixel UI Icons \u2013 Game Interface Pack_40"
+  - first:
+      213: -3607656734280668241
+    second: "32x32 Pixel UI Icons \u2013 Game Interface Pack_41"
+  - first:
+      213: 9180168664795584432
+    second: "32x32 Pixel UI Icons \u2013 Game Interface Pack_42"
+  - first:
+      213: 1353243231502329351
+    second: "32x32 Pixel UI Icons \u2013 Game Interface Pack_43"
+  - first:
+      213: 3699469619817524582
+    second: "32x32 Pixel UI Icons \u2013 Game Interface Pack_44"
+  - first:
+      213: -8209162566356450486
+    second: "32x32 Pixel UI Icons \u2013 Game Interface Pack_45"
+  - first:
+      213: 1257746699402439111
+    second: "32x32 Pixel UI Icons \u2013 Game Interface Pack_46"
+  - first:
+      213: -4697671990362284488
+    second: "32x32 Pixel UI Icons \u2013 Game Interface Pack_47"
+  - first:
+      213: 5884089464816117810
+    second: "32x32 Pixel UI Icons \u2013 Game Interface Pack_48"
+  - first:
+      213: 7900489648685172502
+    second: "32x32 Pixel UI Icons \u2013 Game Interface Pack_49"
+  - first:
+      213: -5541280010236243968
+    second: "32x32 Pixel UI Icons \u2013 Game Interface Pack_50"
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 16
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: "32x32 Pixel UI Icons \u2013 Game Interface Pack_0"
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 160
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dd1c87ff5ca1e4a80800000000000000
+      internalID: -8480811610595081763
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "32x32 Pixel UI Icons \u2013 Game Interface Pack_1"
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 160
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2072b45b8f821cac0800000000000000
+      internalID: -3836740358884350206
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "32x32 Pixel UI Icons \u2013 Game Interface Pack_2"
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 160
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 483a2d98f6ba6d960800000000000000
+      internalID: 7626471514540516228
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "32x32 Pixel UI Icons \u2013 Game Interface Pack_3"
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 160
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4a74b197a1f213b80800000000000000
+      internalID: -8416894437831260252
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "32x32 Pixel UI Icons \u2013 Game Interface Pack_4"
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 160
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 526a16e7e883b4d80800000000000000
+      internalID: -8265450506451573211
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "32x32 Pixel UI Icons \u2013 Game Interface Pack_5"
+      rect:
+        serializedVersion: 2
+        x: 160
+        y: 160
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2d3a46b19579ee190800000000000000
+      internalID: -7931235484785400878
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "32x32 Pixel UI Icons \u2013 Game Interface Pack_6"
+      rect:
+        serializedVersion: 2
+        x: 192
+        y: 160
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f0db4ac25f6558e10800000000000000
+      internalID: 2199259604056325391
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "32x32 Pixel UI Icons \u2013 Game Interface Pack_7"
+      rect:
+        serializedVersion: 2
+        x: 224
+        y: 160
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ec79cca573a3a04d0800000000000000
+      internalID: -3167655378480752690
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "32x32 Pixel UI Icons \u2013 Game Interface Pack_8"
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 128
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0bfbdf7a354d578b0800000000000000
+      internalID: -5154980742689865808
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "32x32 Pixel UI Icons \u2013 Game Interface Pack_9"
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 128
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: feb926e8b9adf9a30800000000000000
+      internalID: 4224335337140427759
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "32x32 Pixel UI Icons \u2013 Game Interface Pack_10"
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 128
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 05749a7cf7ae05ff0800000000000000
+      internalID: -49281761369569456
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "32x32 Pixel UI Icons \u2013 Game Interface Pack_11"
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 128
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ec79d0de97e005160800000000000000
+      internalID: 7012120536646784974
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "32x32 Pixel UI Icons \u2013 Game Interface Pack_12"
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 128
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a0b66eb67c0e88b50800000000000000
+      internalID: 6595768801397467914
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "32x32 Pixel UI Icons \u2013 Game Interface Pack_13"
+      rect:
+        serializedVersion: 2
+        x: 160
+        y: 128
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9bfb4cb14914e7e40800000000000000
+      internalID: 5656030286400765881
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "32x32 Pixel UI Icons \u2013 Game Interface Pack_14"
+      rect:
+        serializedVersion: 2
+        x: 192
+        y: 128
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 24c1e3a59018a0250800000000000000
+      internalID: 5911679338045905986
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "32x32 Pixel UI Icons \u2013 Game Interface Pack_15"
+      rect:
+        serializedVersion: 2
+        x: 224
+        y: 128
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 24c398059a6fe92c0800000000000000
+      internalID: -4422826576970171326
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "32x32 Pixel UI Icons \u2013 Game Interface Pack_16"
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 96
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 19be802b7549ced80800000000000000
+      internalID: -8220032115488003183
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "32x32 Pixel UI Icons \u2013 Game Interface Pack_17"
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 96
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b9cb0c9a2bb9549c0800000000000000
+      internalID: -3943574707038536549
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "32x32 Pixel UI Icons \u2013 Game Interface Pack_18"
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 96
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ecb9eab75b00c5940800000000000000
+      internalID: 5286100842090240974
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "32x32 Pixel UI Icons \u2013 Game Interface Pack_19"
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 96
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 86bbb5ca41cd20020800000000000000
+      internalID: 2306647940516264808
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "32x32 Pixel UI Icons \u2013 Game Interface Pack_20"
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 96
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ec52f9cc93b7c2780800000000000000
+      internalID: -8706448491437677106
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "32x32 Pixel UI Icons \u2013 Game Interface Pack_21"
+      rect:
+        serializedVersion: 2
+        x: 160
+        y: 96
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 60ace87d86752ea90800000000000000
+      internalID: -7286165139327366650
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "32x32 Pixel UI Icons \u2013 Game Interface Pack_22"
+      rect:
+        serializedVersion: 2
+        x: 192
+        y: 96
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7edfd8044bf298d90800000000000000
+      internalID: -7095087286721839641
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "32x32 Pixel UI Icons \u2013 Game Interface Pack_23"
+      rect:
+        serializedVersion: 2
+        x: 224
+        y: 96
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2e00093301a76c830800000000000000
+      internalID: 4091091521515815138
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "32x32 Pixel UI Icons \u2013 Game Interface Pack_24"
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c0aa522b4188dfac0800000000000000
+      internalID: -3819747286470776308
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "32x32 Pixel UI Icons \u2013 Game Interface Pack_25"
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 725709cc7c7457820800000000000000
+      internalID: 2915315257248347431
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "32x32 Pixel UI Icons \u2013 Game Interface Pack_26"
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fb079cc0a8a39c850800000000000000
+      internalID: 6397709110250926271
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "32x32 Pixel UI Icons \u2013 Game Interface Pack_27"
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cdfa9960eab4879e0800000000000000
+      internalID: -1623464454859935780
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "32x32 Pixel UI Icons \u2013 Game Interface Pack_28"
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 98d38a464137b95c0800000000000000
+      internalID: -4207642895422308983
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "32x32 Pixel UI Icons \u2013 Game Interface Pack_29"
+      rect:
+        serializedVersion: 2
+        x: 160
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 028702b6f4617fa30800000000000000
+      internalID: 4248889303802869792
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "32x32 Pixel UI Icons \u2013 Game Interface Pack_30"
+      rect:
+        serializedVersion: 2
+        x: 192
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e677395ae099c8e20800000000000000
+      internalID: 3354224110670673774
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "32x32 Pixel UI Icons \u2013 Game Interface Pack_31"
+      rect:
+        serializedVersion: 2
+        x: 224
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6006c0f62e3b2f440800000000000000
+      internalID: 4968231124050141190
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "32x32 Pixel UI Icons \u2013 Game Interface Pack_32"
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f8eed823437684380800000000000000
+      internalID: -8986819582533702001
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "32x32 Pixel UI Icons \u2013 Game Interface Pack_33"
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cff6ce66c6013c0b0800000000000000
+      internalID: -5709701844806373380
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "32x32 Pixel UI Icons \u2013 Game Interface Pack_34"
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 866bd1aedfdd9de10800000000000000
+      internalID: 2223051973708330600
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "32x32 Pixel UI Icons \u2013 Game Interface Pack_35"
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 833bd9331ae9d9330800000000000000
+      internalID: 3719303282470794040
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "32x32 Pixel UI Icons \u2013 Game Interface Pack_36"
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 32f5d505f332b3950800000000000000
+      internalID: 6429771647839723299
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "32x32 Pixel UI Icons \u2013 Game Interface Pack_37"
+      rect:
+        serializedVersion: 2
+        x: 160
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e35519c7b1357a360800000000000000
+      internalID: 7180799508384666942
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "32x32 Pixel UI Icons \u2013 Game Interface Pack_38"
+      rect:
+        serializedVersion: 2
+        x: 192
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d04d107365288a5e0800000000000000
+      internalID: -1898123936134999027
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "32x32 Pixel UI Icons \u2013 Game Interface Pack_39"
+      rect:
+        serializedVersion: 2
+        x: 224
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a8f2a3099a8182340800000000000000
+      internalID: 4839144916157869962
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "32x32 Pixel UI Icons \u2013 Game Interface Pack_40"
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4f2b81718ce6d56d0800000000000000
+      internalID: -3000119971098873100
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "32x32 Pixel UI Icons \u2013 Game Interface Pack_41"
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: faba7a970570fedc0800000000000000
+      internalID: -3607656734280668241
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: ed3419622c91e0b40bb1aa894afbd60a
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":8.0,"y":6.0},"gridSpriteSize":{"x":32.0,"y":32.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":2,"keepEmptyRects":false,"isAlternate":false}'
+    nameFileIdTable:
+      "32x32 Pixel UI Icons \u2013 Game Interface Pack_0": -8480811610595081763
+      "32x32 Pixel UI Icons \u2013 Game Interface Pack_1": -3836740358884350206
+      "32x32 Pixel UI Icons \u2013 Game Interface Pack_10": -49281761369569456
+      "32x32 Pixel UI Icons \u2013 Game Interface Pack_11": 7012120536646784974
+      "32x32 Pixel UI Icons \u2013 Game Interface Pack_12": 6595768801397467914
+      "32x32 Pixel UI Icons \u2013 Game Interface Pack_13": 5656030286400765881
+      "32x32 Pixel UI Icons \u2013 Game Interface Pack_14": 5911679338045905986
+      "32x32 Pixel UI Icons \u2013 Game Interface Pack_15": -4422826576970171326
+      "32x32 Pixel UI Icons \u2013 Game Interface Pack_16": -8220032115488003183
+      "32x32 Pixel UI Icons \u2013 Game Interface Pack_17": -3943574707038536549
+      "32x32 Pixel UI Icons \u2013 Game Interface Pack_18": 5286100842090240974
+      "32x32 Pixel UI Icons \u2013 Game Interface Pack_19": 2306647940516264808
+      "32x32 Pixel UI Icons \u2013 Game Interface Pack_2": 7626471514540516228
+      "32x32 Pixel UI Icons \u2013 Game Interface Pack_20": -8706448491437677106
+      "32x32 Pixel UI Icons \u2013 Game Interface Pack_21": -7286165139327366650
+      "32x32 Pixel UI Icons \u2013 Game Interface Pack_22": -7095087286721839641
+      "32x32 Pixel UI Icons \u2013 Game Interface Pack_23": 4091091521515815138
+      "32x32 Pixel UI Icons \u2013 Game Interface Pack_24": -3819747286470776308
+      "32x32 Pixel UI Icons \u2013 Game Interface Pack_25": 2915315257248347431
+      "32x32 Pixel UI Icons \u2013 Game Interface Pack_26": 6397709110250926271
+      "32x32 Pixel UI Icons \u2013 Game Interface Pack_27": -1623464454859935780
+      "32x32 Pixel UI Icons \u2013 Game Interface Pack_28": -4207642895422308983
+      "32x32 Pixel UI Icons \u2013 Game Interface Pack_29": 4248889303802869792
+      "32x32 Pixel UI Icons \u2013 Game Interface Pack_3": -8416894437831260252
+      "32x32 Pixel UI Icons \u2013 Game Interface Pack_30": 3354224110670673774
+      "32x32 Pixel UI Icons \u2013 Game Interface Pack_31": 4968231124050141190
+      "32x32 Pixel UI Icons \u2013 Game Interface Pack_32": -8986819582533702001
+      "32x32 Pixel UI Icons \u2013 Game Interface Pack_33": -5709701844806373380
+      "32x32 Pixel UI Icons \u2013 Game Interface Pack_34": 2223051973708330600
+      "32x32 Pixel UI Icons \u2013 Game Interface Pack_35": 3719303282470794040
+      "32x32 Pixel UI Icons \u2013 Game Interface Pack_36": 6429771647839723299
+      "32x32 Pixel UI Icons \u2013 Game Interface Pack_37": 7180799508384666942
+      "32x32 Pixel UI Icons \u2013 Game Interface Pack_38": -1898123936134999027
+      "32x32 Pixel UI Icons \u2013 Game Interface Pack_39": 4839144916157869962
+      "32x32 Pixel UI Icons \u2013 Game Interface Pack_4": -8265450506451573211
+      "32x32 Pixel UI Icons \u2013 Game Interface Pack_40": -3000119971098873100
+      "32x32 Pixel UI Icons \u2013 Game Interface Pack_41": -3607656734280668241
+      "32x32 Pixel UI Icons \u2013 Game Interface Pack_5": -7931235484785400878
+      "32x32 Pixel UI Icons \u2013 Game Interface Pack_6": 2199259604056325391
+      "32x32 Pixel UI Icons \u2013 Game Interface Pack_7": -3167655378480752690
+      "32x32 Pixel UI Icons \u2013 Game Interface Pack_8": -5154980742689865808
+      "32x32 Pixel UI Icons \u2013 Game Interface Pack_9": 4224335337140427759
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
