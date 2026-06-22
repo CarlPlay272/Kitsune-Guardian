@@ -84,7 +84,6 @@ public class KitsuneHealth : MonoBehaviour, IDamageable
                 Heal(debugStep); //
             }
 
-            // CONTROL DE ENERGÍA (ESPÍRITU)
             KitsuneSpirit spiritComp = GetComponentInParent<KitsuneSpirit>() ?? GetComponentInChildren<KitsuneSpirit>(); //
             if (spiritComp != null) //
             {
@@ -152,10 +151,9 @@ public class KitsuneHealth : MonoBehaviour, IDamageable
         SceneManager.LoadScene(nombreEscenaActual); //
     }
 
-    // 🔥 TRADUCTOR DE INTERFAZ: Recibe el daño del Oni (int) y lo envía al método float de abajo de forma nativa
     public void TakeDamage(int amount)
     {
-        TakeDamage((float)amount);
+        TakeDamage((float)amount); //
     }
 
     public void TakeDamage(float damage)
@@ -208,10 +206,20 @@ public class KitsuneHealth : MonoBehaviour, IDamageable
             GameController.Instance.RestarVida(1); //
         }
 
+        // 🔥 ESPERA COHERENTE: Espera el delay completo de 1 o 2 segundos antes de que aparezca la UI
         yield return new WaitForSeconds(respawnDelay); //
 
         if (GameController.Instance != null && GameController.Instance.VidasActuales <= 0) //
         {
+            KitsuneController controller = GetComponent<KitsuneController>(); //
+            if (controller != null)
+            {
+                controller.BloquearControles(); //
+            }
+
+            // 🔥 GATILLO: Levantamos la pestaña desde acá para que respete el tiempo exacto de delay
+            GameController.Instance.ActivarGameOver();
+
             gameObject.SetActive(false); //
             yield break; //
         }
