@@ -15,7 +15,8 @@ GameObject:
   - component: {fileID: 3768742017512213803}
   - component: {fileID: 4459508488027667384}
   - component: {fileID: 8916669317559294729}
-  m_Layer: 8
+  - component: {fileID: 1214740758019320369}
+  m_Layer: 9
   m_Name: Enemy_Tengu_01
   m_TagString: Enemy
   m_Icon: {fileID: 0}
@@ -145,7 +146,7 @@ Rigidbody2D:
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
-  m_Constraints: 6
+  m_Constraints: 4
 --- !u!70 &3768742017512213803
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -195,9 +196,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18dd212b1565e0942a977fb755bd7a0d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TenguState
-  maxHealth: 10
+  maxHealth: 6
   currentHealth: 0
-  animator: {fileID: 0}
+  animator: {fileID: 447277802950556835}
   collidersToDisable: []
   rb: {fileID: 0}
   isDead: 0
@@ -230,6 +231,18 @@ MonoBehaviour:
   attackCooldown: 1
   attackDamage: 10
   debugLogs: 0
+--- !u!114 &1214740758019320369
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 487075962737850631}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e2e620fcdced0f34a93b5b2571c20328, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TenguDeathHook
 --- !u!1 &5990296761446435149
 GameObject:
   m_ObjectHideFlags: 0
@@ -239,7 +252,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3205155783688856033}
-  m_Layer: 8
+  m_Layer: 9
   m_Name: AttackPoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}

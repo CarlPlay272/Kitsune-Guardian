@@ -189,6 +189,7 @@ public class GameController : MonoBehaviour
             if (escenaNombre == "Nivel_1")
             {
                 GameObject puntoDestino1 = GameObject.Find("DestinoPortal_Mapa1");
+
                 if (puntoDestino1 != null)
                 {
                     player.transform.position = puntoDestino1.transform.position;
@@ -202,10 +203,25 @@ public class GameController : MonoBehaviour
             else if (escenaNombre == "Nivel_2")
             {
                 GameObject puntoDestino2 = GameObject.Find("DestinoPortal_Mapa2");
+
                 if (puntoDestino2 != null)
                 {
                     player.transform.position = puntoDestino2.transform.position;
                     puntoRetornoActual = puntoDestino2.transform.position;
+                }
+                else
+                {
+                    puntoRetornoActual = player.transform.position;
+                }
+            }
+            else if (escenaNombre == "Nivel_3")
+            {
+                GameObject puntoDestino3 = GameObject.Find("DestinoPortal_Mapa3");
+
+                if (puntoDestino3 != null)
+                {
+                    player.transform.position = puntoDestino3.transform.position;
+                    puntoRetornoActual = puntoDestino3.transform.position;
                 }
                 else
                 {

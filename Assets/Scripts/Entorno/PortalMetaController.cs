@@ -141,16 +141,21 @@ public class PortalMetaController : MonoBehaviour
         {
             if (corrutinaTexto != null) StopCoroutine(corrutinaTexto);
             textMeshProReferencia.text = textoConLlave;
+
             Color c = textMeshProReferencia.color;
             c.a = 1f;
             textMeshProReferencia.color = c;
         }
 
-        // Espera para reproducir la animación y leer el texto en el mundo
         yield return new WaitForSeconds(retrasoCargaEscena);
 
-        // Determinación inteligente de la escena destino
-        string escenaDestino = (escenaOrigen == "Nivel_1") ? "Nivel_2" : "Nivel_1";
+        string escenaDestino = escenaOrigen switch
+        {
+            "Nivel_1" => "Nivel_2",
+            "Nivel_2" => "Nivel_3",
+            "Nivel_3" => "Nivel_1", // cambiar si deseas otro destino final
+            _ => "Nivel_1"
+        };
 
         if (GameController.Instance != null)
         {
@@ -159,14 +164,12 @@ public class PortalMetaController : MonoBehaviour
 
         Debug.Log("Lanzando pantalla de carga asíncrona hacia: " + escenaDestino);
 
-        // 🔥 MODIFICACIÓN COMPLETA: Cambiamos la carga seca por la transición mística
         if (LoadingManager.Instance != null)
         {
             LoadingManager.Instance.CambiarEscenaMistica(escenaDestino);
         }
         else
         {
-            // Caída de seguridad por si no encuentra el script maestro en la escena actual
             SceneManager.LoadScene(escenaDestino);
         }
     }
