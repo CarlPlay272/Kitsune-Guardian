@@ -1,31 +1,7 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
-
-public interface IDamageable
-{
-    void TakeDamage(int amount);
-}
-
-public interface IInvisibilityProvider
-{
-    bool IsInvisible { get; }
-}
-
-public enum BossState
-{
-    Idle,
-    Attacking,
-    Summoning,
-    WaitingClear,
-    Dead
-}
-
-public enum BossPhase
-{
-    Phase1,
-    Phase2
-}
 
 [RequireComponent(typeof(Collider2D))]
 public class OniBoss : MonoBehaviour, IDamageable
@@ -43,20 +19,24 @@ public class OniBoss : MonoBehaviour, IDamageable
     [Header("Invocación")]
     [SerializeField] private Transform[] spawnPoints;
     [SerializeField] private GameObject tenguPrefab;
-    [SerializeField] private float delayBetweenTengus = 0.2f;
+    [SerializeField] private float delayBetweenTengus = 1.2f;
 
-    [Header("Ataques")]
+    [Header("Ataques Básicos")]
     [SerializeField] private GameObject corruptProjectilePrefab;
     [SerializeField] private Transform projectileSpawnPoint;
     [SerializeField] private int burstProjectileCount = 3;
-    [SerializeField] private float projectileSpeed = 6f;
+    [SerializeField] private float projectileSpeed = 10f;
     [SerializeField] private float projectileSpacing = 0.3f;
+
+    [Header("Ataques Especiales (Fase 2)")]
+    [SerializeField] private GameObject homingOrbPrefab;
+    [SerializeField] private GameObject waveAttackPrefab;
 
     [Header("Cooldowns")]
     [SerializeField] private float attackCooldownPhase1 = 3f;
-    [SerializeField] private float attackCooldownPhase2 = 1.5f;
-    [SerializeField] private float summonCooldownPhase1 = 8f;
-    [SerializeField] private float summonCooldownPhase2 = 4f;
+    [SerializeField] private float attackCooldownPhase2 = 1.8f;
+    [SerializeField] private float summonCooldownPhase1 = 12f;
+    [SerializeField] private float summonCooldownPhase2 = 18f; // Súper nerfeado a 18 segundos
 
     [Header("Eventos")]
     [SerializeField] private UnityEvent onBossDeath;
@@ -68,6 +48,9 @@ public class OniBoss : MonoBehaviour, IDamageable
     private int enemiesAlive = 0;
     private bool combatActive;
     private Coroutine combatLoopRoutine;
+
+    private List<GameObject> misTengusInvocados = new List<GameObject>();
+    private bool yaInvoqueEnEsteCiclo = false;
 
     private void Awake()
     {
@@ -88,9 +71,17 @@ public class OniBoss : MonoBehaviour, IDamageable
 
         combatActive = true;
         currentHealth = maxHealth;
-
         enemiesAlive = 0;
+        yaInvoqueEnEsteCiclo = false;
+        misTengusInvocados.Clear();
         currentState = BossState.Idle;
+
+        if (BossOniHUDController.Instance != null)
+        {
+            BossOniHUDController.Instance.ConfigurarArena(this);
+            BossOniHUDController.Instance.ActualizarVidaOni(1f);
+            BossOniHUDController.Instance.CambiarEstadoPresenciaJugador(true);
+        }
 
         onCombatStart?.Invoke();
 
@@ -102,41 +93,42 @@ public class OniBoss : MonoBehaviour, IDamageable
 
     private IEnumerator CombatLoop()
     {
-        float lastSummonTime = -999f;
+        yield return StartCoroutine(SummonTengus());
+        float lastSummonTime = Time.time;
 
         while (currentState != BossState.Dead)
         {
-            currentPhase = (currentHealth <= maxHealth * 0.5f)
-                ? BossPhase.Phase2
-                : BossPhase.Phase1;
+            currentPhase = (currentHealth <= maxHealth * 0.5f) ? BossPhase.Phase2 : BossPhase.Phase1;
 
-            float summonCooldown = currentPhase == BossPhase.Phase1
-                ? summonCooldownPhase1
-                : summonCooldownPhase2;
+            float summonCooldown = currentPhase == BossPhase.Phase1 ? summonCooldownPhase1 : summonCooldownPhase2;
+            float attackCooldown = currentPhase == BossPhase.Phase1 ? attackCooldownPhase1 : attackCooldownPhase2;
 
-            float attackCooldown = currentPhase == BossPhase.Phase1
-                ? attackCooldownPhase1
-                : attackCooldownPhase2;
+            if (!QuedanMisTengusVivos())
+            {
+                enemiesAlive = 0;
+            }
 
-            // 🔥 PRIORIDAD: si hay enemigos vivos, esperar
             if (enemiesAlive > 0)
             {
                 currentState = BossState.WaitingClear;
-                yield return new WaitForSeconds(1f);
+                yield return new WaitForSeconds(0.5f);
                 continue;
             }
 
             currentState = BossState.Idle;
 
-            bool canSummon = Time.time - lastSummonTime >= summonCooldown;
+            bool canSummon = (Time.time - lastSummonTime >= summonCooldown) && !yaInvoqueEnEsteCiclo;
 
-            if (canSummon && Random.value < 0.5f)
+            // Solo 15% de probabilidad para que sea súper jugable
+            if (canSummon && Random.value < 0.15f)
             {
                 lastSummonTime = Time.time;
+                yaInvoqueEnEsteCiclo = true;
                 yield return StartCoroutine(SummonTengus());
             }
             else
             {
+                yaInvoqueEnEsteCiclo = false;
                 yield return StartCoroutine(ExecuteRandomAttack());
             }
 
@@ -148,20 +140,26 @@ public class OniBoss : MonoBehaviour, IDamageable
     {
         currentState = BossState.Summoning;
 
-        int amount = Random.Range(2, 5);
-
-        enemiesAlive += amount;
+        int amount = Random.Range(2, 4);
+        enemiesAlive = 0;
 
         for (int i = 0; i < amount; i++)
         {
-            Transform spawn = spawnPoints[Random.Range(0, spawnPoints.Length)];
+            if (spawnPoints.Length == 0) break;
+            Transform spawn = spawnPoints[i % spawnPoints.Length];
 
             GameObject enemy = Instantiate(tenguPrefab, spawn.position, spawn.rotation);
+            enemiesAlive++;
+            misTengusInvocados.Add(enemy);
 
-            // 🔥 IMPORTANTE: conectar muerte desde Tengu
+            TenguState tState = enemy.GetComponent<TenguState>();
+            if (tState != null && BossOniHUDController.Instance != null)
+            {
+                BossOniHUDController.Instance.RegistrarTengu(tState);
+            }
+
             TenguDeathHook hook = enemy.GetComponent<TenguDeathHook>();
-            if (hook != null)
-                hook.Init(this);
+            if (hook != null) hook.Init(this);
 
             yield return new WaitForSeconds(delayBetweenTengus);
         }
@@ -172,16 +170,36 @@ public class OniBoss : MonoBehaviour, IDamageable
         enemiesAlive = Mathf.Max(0, enemiesAlive - 1);
     }
 
+    private bool QuedanMisTengusVivos()
+    {
+        misTengusInvocados.RemoveAll(t => t == null);
+        foreach (var go in misTengusInvocados)
+        {
+            TenguState state = go.GetComponent<TenguState>();
+            if (state != null && !state.IsDead) return true;
+        }
+        return false;
+    }
+
     private IEnumerator ExecuteRandomAttack()
     {
         currentState = BossState.Attacking;
 
-        int attack = Random.Range(0, 2);
+        int attackRangeMax = (currentPhase == BossPhase.Phase2) ? 3 : 2;
+        int attack = Random.Range(0, attackRangeMax);
 
         if (attack == 0)
-            yield return AttackCorruptBurst();
+        {
+            yield return StartCoroutine(AttackCorruptBurst());
+        }
+        else if (attack == 1)
+        {
+            yield return StartCoroutine(AttackVoidMark());
+        }
         else
-            yield return AttackVoidMark();
+        {
+            yield return StartCoroutine(AttackBossWave());
+        }
 
         currentState = BossState.Idle;
     }
@@ -192,6 +210,7 @@ public class OniBoss : MonoBehaviour, IDamageable
 
         for (int i = 0; i < burstProjectileCount; i++)
         {
+            if (corruptProjectilePrefab == null) break;
             GameObject proj = Instantiate(corruptProjectilePrefab, origin.position, Quaternion.identity);
 
             var script = proj.GetComponent<BossProjectile>();
@@ -207,30 +226,65 @@ public class OniBoss : MonoBehaviour, IDamageable
 
     private IEnumerator AttackVoidMark()
     {
-        yield return null;
+        Transform origin = projectileSpawnPoint != null ? projectileSpawnPoint : transform;
+        if (homingOrbPrefab != null && player != null)
+        {
+            GameObject orb = Instantiate(homingOrbPrefab, origin.position, Quaternion.identity);
+            var script = orb.GetComponent<BossHomingOrb>();
+            var invProvider = player.GetComponent<IInvisibilityProvider>();
+            if (script != null)
+            {
+                script.Initialize(player, invProvider);
+            }
+        }
+        yield return new WaitForSeconds(0.5f);
+    }
+
+    private IEnumerator AttackBossWave()
+    {
+        Transform origin = projectileSpawnPoint != null ? projectileSpawnPoint : transform;
+        if (waveAttackPrefab != null)
+        {
+            Instantiate(waveAttackPrefab, new Vector3(origin.position.x, origin.position.y - 1.8f, origin.position.z), Quaternion.identity);
+        }
+        yield return new WaitForSeconds(0.8f);
     }
 
     public void TakeDamage(int amount)
     {
         if (currentState == BossState.Dead) return;
 
+        if (enemiesAlive > 0 || QuedanMisTengusVivos())
+        {
+            Debug.Log("🛡️ ¡El Oni está protegido por el escudo místico de los Tengus!");
+            return;
+        }
+
         currentHealth = Mathf.Max(0, currentHealth - amount);
 
-        if (currentHealth <= 0)
-            Die();
+        if (BossOniHUDController.Instance != null)
+        {
+            BossOniHUDController.Instance.ActualizarVidaOni((float)currentHealth / maxHealth);
+        }
+
+        if (currentHealth <= 0) Die();
     }
 
     private void Die()
     {
         currentState = BossState.Dead;
         combatActive = false;
-
         StopAllCoroutines();
 
-        damageCollider.enabled = false;
+        if (BossOniHUDController.Instance != null)
+        {
+            BossOniHUDController.Instance.CambiarEstadoPresenciaJugador(false);
+        }
 
+        if (damageCollider != null) damageCollider.enabled = false;
         animator?.SetTrigger("Dead");
-
         onBossDeath?.Invoke();
+
+        Destroy(gameObject, 1.5f); // Desaparece rápido en 1.5s
     }
 }

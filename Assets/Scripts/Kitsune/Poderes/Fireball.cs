@@ -1,4 +1,4 @@
-using UnityEngine;
+Ôªøusing UnityEngine;
 
 public class Fireball : MonoBehaviour
 {
@@ -6,7 +6,7 @@ public class Fireball : MonoBehaviour
     [SerializeField] private float speed = 12f;
     [SerializeField] private float lifeTime = 3f;
 
-    [Header("DaÒo")]
+    [Header("Da√±o")]
     [SerializeField] private int damage = 1;
 
     private Vector2 moveDirection = Vector2.right;
@@ -36,21 +36,32 @@ public class Fireball : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.GetComponent<BossZoneTrigger>() != null || other.GetComponent<Fireball>() != null)
+        if (other.GetComponent<BossGhostTrigger>() != null || other.GetComponent<Fireball>() != null)
         {
             return;
         }
 
-        Debug.Log("Fuego golpeÛ a: " + other.name);
+        Debug.Log("Fuego golpe√≥ a: " + other.name);
 
         // ===============================================================
-        // DETECCI”N EXTRA: PURIFICACI”N DE BLOQUEOS DE VACÕO
+        // DETECCI√ìN DEL JEFE FINAL: ONI BOSS
+        // ===============================================================
+        OniBoss oni = other.GetComponent<OniBoss>() ?? other.GetComponentInParent<OniBoss>();
+        if (oni != null)
+        {
+            oni.TakeDamage(damage); // Aplica el da√±o m√≠stico directo
+            Destroy(gameObject);
+            return;
+        }
+
+        // ===============================================================
+        // DETECCI√ìN EXTRA: PURIFICACI√ìN DE BLOQUEOS DE VAC√çO
         // ===============================================================
         CorruptionBlock bloqueCorrupto = other.GetComponent<CorruptionBlock>() ?? other.GetComponentInParent<CorruptionBlock>();
         if (bloqueCorrupto != null)
         {
             bloqueCorrupto.DestruirBloqueo();
-            Destroy(gameObject); // El fueguito se extingue al purificar el bloque
+            Destroy(gameObject);
             return;
         }
 

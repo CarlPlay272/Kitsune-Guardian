@@ -1,11 +1,5 @@
 using UnityEngine;
 
-/// <summary>
-/// Orbe perseguidor usado por el ataque "Ojo Demoníaco".
-/// Persigue al jugador mientras este sea visible. Si el jugador activa la invisibilidad,
-/// el orbe pierde el objetivo: según configuración, sigue recto o se detiene.
-/// Este ataque existe específicamente para darle utilidad táctica a la invisibilidad.
-/// </summary>
 public class BossHomingOrb : MonoBehaviour
 {
     public enum LostTargetBehavior
@@ -15,62 +9,70 @@ public class BossHomingOrb : MonoBehaviour
     }
 
     [Header("Configuración")]
-    [SerializeField] private float speed = 3.5f;
-    [SerializeField] private float duration = 6f;
-    [SerializeField] private int damage = 10;
-    [SerializeField] private LayerMask playerLayer;
-    [SerializeField] private LostTargetBehavior behaviorOnLostTarget = LostTargetBehavior.ContinueStraight;
+    [SerializeField] private float speed = 3.5f; //[cite: 16]
+    [SerializeField] private float duration = 6f; //[cite: 16]
+    [SerializeField] private int damage = 10; //[cite: 16]
+    [SerializeField] private LayerMask playerLayer; //[cite: 16]
+    [SerializeField] private LostTargetBehavior behaviorOnLostTarget = LostTargetBehavior.ContinueStraight; //[cite: 16]
 
     private Transform target;
     private IInvisibilityProvider invisibilityProvider;
-    private Vector2 lastKnownDirection = Vector2.right;
-    private bool hasTarget = true;
+    private Vector2 lastKnownDirection = Vector2.right; //[cite: 16]
+    private bool hasTarget = true; //[cite: 16]
 
-    /// <summary>
-    /// Debe llamarse justo después de instanciar el orbe.
-    /// </summary>
     public void Initialize(Transform playerTransform, IInvisibilityProvider invisibility)
     {
-        target = playerTransform;
-        invisibilityProvider = invisibility;
-        Destroy(gameObject, duration);
+        target = playerTransform; //[cite: 16]
+        invisibilityProvider = invisibility; //[cite: 16]
+        Destroy(gameObject, duration); //[cite: 16]
+
+        Rigidbody2D rb = GetComponent<Rigidbody2D>(); //[cite: 16]
+        if (rb != null)
+        {
+            rb.bodyType = RigidbodyType2D.Kinematic; //[cite: 16]
+            rb.gravityScale = 0f; //[cite: 16]
+            rb.linearVelocity = Vector2.zero; //[cite: 16]
+        }
     }
 
     private void Update()
     {
-        bool playerInvisible = invisibilityProvider != null && invisibilityProvider.IsInvisible;
+        bool playerInvisible = invisibilityProvider != null && invisibilityProvider.IsInvisible; //[cite: 16]
 
         if (target != null && !playerInvisible)
         {
-            hasTarget = true;
-            lastKnownDirection = ((Vector2)target.position - (Vector2)transform.position).normalized;
+            hasTarget = true; //[cite: 16]
+            lastKnownDirection = ((Vector2)target.position - (Vector2)transform.position).normalized; //[cite: 16]
         }
         else
         {
-            hasTarget = false;
+            hasTarget = false; //[cite: 16]
         }
 
         if (hasTarget)
         {
-            transform.position = Vector2.MoveTowards(transform.position, target.position, speed * Time.deltaTime);
+            transform.position = Vector2.MoveTowards(transform.position, target.position, speed * Time.deltaTime); //[cite: 16]
         }
         else if (behaviorOnLostTarget == LostTargetBehavior.ContinueStraight)
         {
-            transform.Translate(lastKnownDirection * speed * Time.deltaTime, Space.World);
+            transform.Translate(lastKnownDirection * speed * Time.deltaTime, Space.World); //[cite: 16]
         }
-        // Si es StopFollowing, el orbe simplemente no se mueve mientras no tenga objetivo.
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (((1 << other.gameObject.layer) & playerLayer) != 0)
+        if (((1 << other.gameObject.layer) & playerLayer) != 0) //[cite: 16]
         {
-            // Solo daña si el orbe efectivamente tenía objetivo en el momento del impacto.
-            if (hasTarget)
+            if (hasTarget) //[cite: 16]
             {
-                IDamageable damageable = other.GetComponent<IDamageable>();
-                damageable?.TakeDamage(damage);
-                Destroy(gameObject);
+                IDamageable damageable = other.GetComponent<IDamageable>(); //[cite: 16]
+                if (damageable == null) damageable = other.GetComponentInParent<IDamageable>(); //[cite: 16]
+
+                if (damageable != null)
+                {
+                    damageable.TakeDamage(damage); //[cite: 16]
+                    Destroy(gameObject); //[cite: 16]
+                }
             }
         }
     }
