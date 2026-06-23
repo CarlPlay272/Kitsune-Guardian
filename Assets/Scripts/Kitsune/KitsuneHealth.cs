@@ -44,7 +44,6 @@ public class KitsuneHealth : MonoBehaviour, IDamageable
     private Vector3 spawnPosition;
     private float temporizadorR = 0f;
 
-    // 🔥 CONECTADO: Referencia al controlador para verificar el estado del Dash
     private KitsuneController kitsuneController;
 
     public float MaxHealth => maxHealth;
@@ -56,7 +55,6 @@ public class KitsuneHealth : MonoBehaviour, IDamageable
         currentHealth = maxHealth;
         spawnPosition = transform.position;
 
-        // Buscar automáticamente el controlador en el mismo objeto
         kitsuneController = GetComponent<KitsuneController>();
 
         Debug.Log("KitsuneHealth cargado. Vida inicial: " + currentHealth);
@@ -75,8 +73,15 @@ public class KitsuneHealth : MonoBehaviour, IDamageable
             if (Input.GetKeyDown(menosCorazonKey) && GameController.Instance != null)
             {
                 GameController.Instance.ModificarVidasDebug(-1);
+
+                // 🔥 PARCHE TRUCO CORAZONES EN CERO: Si las vidas caen a 0 usando el truco, gatillar el GameOver de inmediato
+                if (GameController.Instance.VidasActuales <= 0)
+                {
+                    StartCoroutine(RespawnRoutine());
+                }
             }
-            if (Input.GetKeyDown(menosCorazonKey) && GameController.Instance != null)
+
+            if (Input.GetKeyDown(masCorazonKey) && GameController.Instance != null)
             {
                 GameController.Instance.ModificarVidasDebug(1);
             }
@@ -166,7 +171,6 @@ public class KitsuneHealth : MonoBehaviour, IDamageable
     {
         if (isDead) return;
 
-        // 🔥 PROPUESTA DE CARLOS: Si el Kitsune está ejecutando un Dash, se vuelve inmune al daño de las garras[cite: 3, 4]
         if (kitsuneController != null && kitsuneController.IsDashing)
         {
             Debug.Log("🛡️ [INVULNERABLE] Kitsune esquivó el golpe usando la inmunidad del Dash.");
@@ -214,7 +218,8 @@ public class KitsuneHealth : MonoBehaviour, IDamageable
         isDead = true;
         temporizadorR = 0f;
 
-        if (GameController.Instance != null)
+        // 🔥 MODIFICADO: Solo restamos vida si no venimos de un truco que ya las dejó en cero
+        if (GameController.Instance != null && GameController.Instance.VidasActuales > 0)
         {
             GameController.Instance.RestarVida(1);
         }

@@ -3,6 +3,7 @@ using TMPro;
 using UnityEngine.SceneManagement;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.UI; // 🔥 OBLIGATORIO: Para conectar y limpiar los listeners de los botones de la UI
 
 public class GameController : MonoBehaviour
 {
@@ -142,7 +143,7 @@ public class GameController : MonoBehaviour
         puntosText = GameObject.Find("PuntosText")?.GetComponent<TMP_Text>();
 
         Transform hudCanvas = GameObject.Find("HUD")?.transform;
-        if (hudCanvas != null) //
+        if (hudCanvas != null)
         {
             colaHUD1 = hudCanvas.Find("TailIcons/ColaHUD_01_Invisibilidad")?.gameObject;
             colaHUD2 = hudCanvas.Find("TailIcons/ColaHUD_02_Dash")?.gameObject;
@@ -151,6 +152,31 @@ public class GameController : MonoBehaviour
             if (panelTransform != null)
             {
                 gameOverPanel = panelTransform.gameObject;
+
+                // 🔥 CORREGIDO APUNTANDO A TU JERARQUÍA REAL: Buscamos "BotonReiniciar" y "BotonSalir" directamente
+                Button btnReiniciar = panelTransform.Find("BotonReiniciar")?.GetComponent<Button>();
+                if (btnReiniciar != null)
+                {
+                    btnReiniciar.onClick.RemoveAllListeners();
+                    btnReiniciar.onClick.AddListener(ReiniciarNivelBoton);
+                    Debug.Log("🎮 [VINCULACIÓN] BotonReiniciar conectado con éxito en escena: " + scene.name);
+                }
+                else
+                {
+                    Debug.LogWarning("⚠️ [VINCULACIÓN] No se encontró el objeto 'BotonReiniciar' dentro de GameOverPanel.");
+                }
+
+                Button btnSalir = panelTransform.Find("BotonSalir")?.GetComponent<Button>();
+                if (btnSalir != null)
+                {
+                    btnSalir.onClick.RemoveAllListeners();
+                    btnSalir.onClick.AddListener(SalirAlMenuBoton);
+                    Debug.Log("Publicidad [VINCULACIÓN] BotonSalir conectado con éxito en escena: " + scene.name);
+                }
+                else
+                {
+                    Debug.LogWarning("⚠️ [VINCULACIÓN] No se encontró el objeto 'BotonSalir' dentro de GameOverPanel.");
+                }
             }
         }
 
@@ -167,10 +193,9 @@ public class GameController : MonoBehaviour
         }
 
         InitializeData();
-        controlesBloqueadosPorHistoria = false; // Reset de seguridad por cambio de mapa
+        controlesBloqueadosPorHistoria = false;
     }
 
-    // 🔥 NUEVO: Método centralizado para forzar el estado físico del Kitsune de forma persistente
     public void SetBloqueoHistoria(bool bloquear)
     {
         controlesBloqueadosPorHistoria = bloquear;
@@ -209,7 +234,7 @@ public class GameController : MonoBehaviour
 
             string escenaNombre = SceneManager.GetActiveScene().name;
 
-            if (escenaNombre == "Nivel_1")
+            if (escenaNombre == "Nivel_1" || escenaNombre == "Nivel1")
             {
                 GameObject puntoDestino1 = GameObject.Find("DestinoPortal_Mapa1");
                 if (puntoDestino1 != null)
@@ -219,7 +244,7 @@ public class GameController : MonoBehaviour
                 }
                 else puntoRetornoActual = player.transform.position;
             }
-            else if (escenaNombre == "Nivel_2")
+            else if (escenaNombre == "Nivel_2" || escenaNombre == "Nivel2")
             {
                 GameObject puntoDestino2 = GameObject.Find("DestinoPortal_Mapa2");
                 if (puntoDestino2 != null)
@@ -229,7 +254,7 @@ public class GameController : MonoBehaviour
                 }
                 else puntoRetornoActual = player.transform.position;
             }
-            else if (escenaNombre == "Nivel_3")
+            else if (escenaNombre == "Nivel_3" || escenaNombre == "Nivel3")
             {
                 GameObject puntoDestino3 = GameObject.Find("DestinoPortal_Mapa3");
                 if (puntoDestino3 != null)
@@ -256,12 +281,6 @@ public class GameController : MonoBehaviour
             if (spiritComp != null && cachedSpirit > 0)
             {
                 spiritComp.CurrentSpirit = cachedSpirit;
-            }
-
-            KitsuneController controllerComp = player.GetComponent<KitsuneController>();
-            if (controllerComp != null)
-            {
-                Debug.Log("🔥 [SINCRO] Persistencia del disparo inyectada con éxito: " + disparoDesbloqueado);
             }
         }
     }
@@ -328,7 +347,6 @@ public class GameController : MonoBehaviour
     {
         if (disparoDesbloqueado) return;
         disparoDesbloqueado = true;
-        Debug.Log("Disparo unlocked");
     }
 
     public void PurificarBosqueSagrado()
@@ -350,8 +368,6 @@ public class GameController : MonoBehaviour
 
         if (humosSalto != null) humosSalto.SetActive(true);
         if (jumpPadTrigger != null) jumpPadTrigger.SetActive(true);
-
-        Debug.Log("🚀 [SISTEMA] ¡Plataforma de salto activada de forma forzada con éxito!");
     }
 
     public void ObtenerLlaveAzul()
@@ -364,6 +380,12 @@ public class GameController : MonoBehaviour
     {
         if (vidasText != null) vidasText.text = vidasActuales.ToString();
         if (puntosText != null) puntosText.text = puntosActuales.ToString();
+
+        GameObject filaCorazonesObj = GameObject.Find("Fila_Corazones");
+        if (filaCorazonesObj != null)
+        {
+            filaCorazonesObj.SendMessage("ActualizarCorazonesVisuales", SendMessageOptions.DontRequireReceiver);
+        }
     }
 
     public void ActivarGameOver()
@@ -392,6 +414,7 @@ public class GameController : MonoBehaviour
 
     public void ReiniciarNivelBoton()
     {
+        Time.timeScale = 1f;
         vieneDeNivelAnterior = false;
         cachedHealth = -1f;
         cachedSpirit = -1f;
@@ -404,14 +427,31 @@ public class GameController : MonoBehaviour
 
     public void SalirAlMenuBoton()
     {
+        Time.timeScale = 1f;
         vieneDeNivelAnterior = false;
 
-        if (gameOverPanel != null) gameOverPanel.SetActive(false);
+        // 🔥 PARCHE ANTE-FANTASMA: Apagar el panel de inmediato antes del viaje
+        if (gameOverPanel != null)
+        {
+            gameOverPanel.SetActive(false);
+        }
+
         SceneManager.sceneLoaded -= OnSceneLoaded;
 
-        Destroy(gameObject);
+        // 🔥 MODIFICADO: Invocar al LoadingManager para que cargue el MainMenu usando tu transición mística asíncrona
+        if (LoadingManager.Instance != null)
+        {
+            Debug.Log("🔄 [TRANSICIÓN] Solicitando regreso místico al MainMenu a través del LoadingManager.");
+            LoadingManager.Instance.CambiarEscenaMistica("MainMenu");
+        }
+        else
+        {
+            // Respaldo de emergencia si el LoadingManager no responde
+            SceneManager.LoadScene("MainMenu");
+        }
 
-        SceneManager.LoadScene("MainMenu");
+        // Suicidamos esta instancia para limpiar la RAM sin entorpecer el proceso de carga asíncrono
+        Destroy(gameObject);
     }
 
     public void ModificarVidasDebug(int cantidad)
@@ -422,20 +462,7 @@ public class GameController : MonoBehaviour
         Debug.Log("❤️ [DEBUG] Vidas modificadas: " + vidasActuales);
     }
 
-    public void DesbloquearDisparoDebug(bool estado)
-    {
-        disparoDesbloqueado = estado;
-    }
-
-    public void DesbloquearInvisibilidadDebug(bool estado)
-    {
-        invisibilidadDesbloqueada = estado;
-        if (colaHUD1 != null) colaHUD1.SetActive(estado);
-    }
-
-    public void DesbloquearDashDebug(bool estado)
-    {
-        dashDesbloqueado = estado;
-        if (colaHUD2 != null) colaHUD2.SetActive(estado);
-    }
+    public void DesbloquearDisparoDebug(bool estado) { disparoDesbloqueado = estado; }
+    public void DesbloquearInvisibilidadDebug(bool estado) { invisibilidadDesbloqueada = estado; if (colaHUD1 != null) colaHUD1.SetActive(estado); }
+    public void DesbloquearDashDebug(bool estado) { dashDesbloqueado = estado; if (colaHUD2 != null) colaHUD2.SetActive(estado); }
 }

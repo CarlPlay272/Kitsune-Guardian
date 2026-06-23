@@ -139,7 +139,6 @@ public class PauseMenuController : MonoBehaviour
 
         isPaused = true;
 
-        // Validar si hay un texto corriendo de verdad para congelar logs[cite: 5]
         IntroduccionInicio introActiva = Object.FindFirstObjectByType<IntroduccionInicio>();
         if (introActiva != null && introActiva.EstaReproduciendose)
         {
@@ -169,16 +168,13 @@ public class PauseMenuController : MonoBehaviour
         Time.timeScale = 1f;
         PausarMusicaEscena(false);
 
-        // 🔥 MODIFICACIÓN COMPLETA: Preguntar al cerebro si la historia mantiene los controles amarrados[cite: 5, 7]
         if (GameController.Instance != null && GameController.Instance.ControlesBloqueadosPorHistoria)
         {
-            // Forzar el bloqueo físico: el jugador NO se moverá aunque se despause[cite: 5, 7]
             BloquearKitsune(true);
             Debug.Log("🛡️ [HIERRO] Menú cerrado en medio de historia. Controles retenidos por GameController.");
         }
         else
         {
-            // Gameplay normal: se devuelven los inputs con normalidad[cite: 5]
             BloquearKitsune(false);
             Debug.Log("🎮 [GAMEPLAY] Menú cerrado de forma normal. Inputs liberados.");
         }
