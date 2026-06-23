@@ -1,472 +1,470 @@
 ﻿using System.Collections;
 using UnityEngine;
 
-// 🔥 CONECTADO: Implementa IInvisibilityProvider para que las ráfagas y orbes detecten tu invisibilidad
 public class KitsuneController : MonoBehaviour, IInvisibilityProvider
 {
     [Header("Movimiento")]
-    [SerializeField] private float moveSpeed = 5f; //
-    [SerializeField] private float jumpForce = 22f; //
+    [SerializeField] private float moveSpeed = 5f;
+    [SerializeField] private float jumpForce = 22f;
 
     [Header("Agua")]
-    [SerializeField] private float waterMoveSpeed = 3.5f; //
-    [SerializeField] private float waterJumpForce = 8f; //
-    [SerializeField] private float normalGravityScale = 3f; //
-    [SerializeField] private float waterGravityScale = 1f; //
-    [SerializeField] private float maxFallSpeedInWater = -4f; //
+    [SerializeField] private float waterMoveSpeed = 3.5f;
+    [SerializeField] private float waterJumpForce = 8f;
+    [SerializeField] private float normalGravityScale = 3f;
+    [SerializeField] private float waterGravityScale = 1f;
+    [SerializeField] private float maxFallSpeedInWater = -4f;
 
     [Header("Suelo")]
-    [SerializeField] private Transform groundCheck; //
-    [SerializeField] private float groundCheckRadius = 0.15f; //
-    [SerializeField] private LayerMask groundLayer; //
+    [SerializeField] private Transform groundCheck;
+    [SerializeField] private float groundCheckRadius = 0.15f;
+    [SerializeField] private LayerMask groundLayer;
 
     [Header("Invisibilidad")]
-    [SerializeField] private KeyCode teclaInvisibilidad = KeyCode.Q; //
-    [SerializeField] private float duracionMaximaInvisibilidad = 4f; //
-    [SerializeField] private float cooldownInvisibilidad = 6f; //
-    [SerializeField] private float alphaInvisible = 0.18f; //
+    [SerializeField] private KeyCode teclaInvisibilidad = KeyCode.Q;
+    [SerializeField] private float duracionMaximaInvisibilidad = 4f;
+    [SerializeField] private float cooldownInvisibilidad = 6f;
+    [SerializeField] private float alphaInvisible = 0.18f;
 
     [Header("Dash")]
-    [SerializeField] private float dashSpeed = 18f; //
-    [SerializeField] private float dashDuration = 0.18f; //
-    [SerializeField] private float dashCooldown = 0.5f; //
-    [SerializeField] private float doubleTapWindow = 0.25f; //
-    [SerializeField] private bool invulnerableDuringDash = true; //
-    [SerializeField] private float dashHitRange = 1.2f; //
+    [SerializeField] private float dashSpeed = 18f;
+    [SerializeField] private float dashDuration = 0.18f;
+    [SerializeField] private float dashCooldown = 0.5f;
+    [SerializeField] private float doubleTapWindow = 0.25f;
+    [SerializeField] private bool invulnerableDuringDash = true;
+    [SerializeField] private float dashHitRange = 1.2f;
 
     [Header("Referencias")]
-    [SerializeField] private Animator animator; //
-    [SerializeField] private Rigidbody2D rb; //
+    [SerializeField] private Animator animator;
+    [SerializeField] private Rigidbody2D rb;
 
     [Header("Disparo (Mecánica Cuphead 8-Dirs)")]
-    [SerializeField] private GameObject fireballPrefab; //
-    [SerializeField] private Transform shootPoint; //
-    [SerializeField] private KeyCode shootKey = KeyCode.J; //
-    [SerializeField] private KeyCode lockMovementKey = KeyCode.LeftControl; //
-    [SerializeField] private float shootCooldown = 0.15f; //
-    [SerializeField] private float spiritCostPerShot = 1f; //
+    [SerializeField] private GameObject fireballPrefab;
+    [SerializeField] private Transform shootPoint;
+    [SerializeField] private KeyCode shootKey = KeyCode.J;
+    [SerializeField] private KeyCode lockMovementKey = KeyCode.LeftControl;
+    [SerializeField] private float shootCooldown = 0.15f;
+    [SerializeField] private float spiritCostPerShot = 1f;
 
     [Header("Recuperación Espíritu")]
-    [SerializeField] private float spiritRecoveryInterval = 5f; //
-    [SerializeField] private float spiritRecoveryAmount = 2f; //
+    [SerializeField] private float spiritRecoveryInterval = 5f;
+    [SerializeField] private float spiritRecoveryAmount = 2f;
 
-    private float nextShootTime = 0f; //
-    private float nextSpiritRecoveryTime = 0f; //
+    private float nextShootTime = 0f;
+    private float nextSpiritRecoveryTime = 0f;
 
-    private KitsuneSpirit kitsuneSpirit; //
+    private KitsuneSpirit kitsuneSpirit;
 
-    private float moveInput; //
-    private bool isGrounded; //
-    private bool facingRight = true; //
-    private bool isInWater = false; //
-    private bool controlBloqueado = false; //
-    private bool isMovementLocked = false; //
+    private float moveInput;
+    private bool isGrounded;
+    private bool facingRight = true;
+    private bool isInWater = false;
+    private bool controlBloqueado = false;
+    private bool isMovementLocked = false;
 
-    private bool isInvisible = false; //
-    private bool invisibilityOnCooldown = false; //
-    private float invisibilityEndTime = 0f; //
+    private bool isInvisible = false;
+    private bool invisibilityOnCooldown = false;
+    private float invisibilityEndTime = 0f;
 
-    private bool isDashing = false; //
-    private bool dashOnCooldown = false; //
-    private float lastTapLeftTime = -999f; //
-    private float lastTapRightTime = -999f; //
-    private int dashDirection = 0; //
-    private bool dashDamageApplied = false; //
-    private bool ghostDashDamageApplied = false; //
+    private bool isDashing = false;
+    private bool dashOnCooldown = false;
+    private float lastTapLeftTime = -999f;
+    private float lastTapRightTime = -999f;
+    private int dashDirection = 0;
+    private bool dashDamageApplied = false;
+    private bool ghostDashDamageApplied = false;
 
-    private SpriteRenderer[] spriteRenderers; //
-    private Collider2D[] playerColliders; //
-    private KitsuneSpirit kitsuneSpiritComp;
+    private SpriteRenderer[] spriteRenderers;
+    private Collider2D[] playerColliders;
 
-    public bool IsInvisible => isInvisible; //
-    public bool InvisibilityOnCooldown => invisibilityOnCooldown; //
-    public float TiempoRestanteInvisibilidad => isInvisible ? Mathf.Max(0f, invisibilityEndTime - Time.time) : 0f; //
-    public bool IsDashing => isDashing; //
+    public bool IsInvisible => isInvisible;
+    public bool InvisibilityOnCooldown => invisibilityOnCooldown;
+    public float TiempoRestanteInvisibilidad => isInvisible ? Mathf.Max(0f, invisibilityEndTime - Time.time) : 0f;
+    public bool IsDashing => isDashing;
 
     void Awake()
     {
         if (rb == null)
-            rb = GetComponent<Rigidbody2D>(); //
+            rb = GetComponent<Rigidbody2D>();
 
         if (animator == null)
-            animator = GetComponent<Animator>(); //
+            animator = GetComponent<Animator>();
 
-        spriteRenderers = GetComponentsInChildren<SpriteRenderer>(); //
-        playerColliders = GetComponentsInChildren<Collider2D>(); //
-        kitsuneSpirit = GetComponent<KitsuneSpirit>(); //
+        spriteRenderers = GetComponentsInChildren<SpriteRenderer>();
+        playerColliders = GetComponentsInChildren<Collider2D>();
+        kitsuneSpirit = GetComponent<KitsuneSpirit>();
     }
 
     void Start()
     {
         if (rb != null)
-            rb.gravityScale = normalGravityScale; //
+            rb.gravityScale = normalGravityScale;
     }
 
     void Update()
     {
-        isMovementLocked = Input.GetKey(lockMovementKey); //
+        isMovementLocked = Input.GetKey(lockMovementKey);
 
         if (!controlBloqueado && !isMovementLocked)
-            moveInput = Input.GetAxisRaw("Horizontal"); //
+            moveInput = Input.GetAxisRaw("Horizontal");
         else
-            moveInput = 0f; //
+            moveInput = 0f;
 
-        isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer); //
+        isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
 
-        if (isMovementLocked && !controlBloqueado && !isDashing) //
+        if (isMovementLocked && !controlBloqueado && !isDashing)
         {
             if (Input.GetKeyDown(KeyCode.D) && !facingRight)
-                Flip(); //
+                Flip();
             else if (Input.GetKeyDown(KeyCode.A) && facingRight)
-                Flip(); //
+                Flip();
         }
 
-        if (!controlBloqueado && !isDashing && Input.GetButtonDown("Jump") && !isMovementLocked) //
+        if (!controlBloqueado && !isDashing && Input.GetButtonDown("Jump") && !isMovementLocked)
         {
-            if (isInWater) //
+            if (isInWater)
             {
-                rb.linearVelocity = new Vector2(rb.linearVelocity.x, waterJumpForce); //
+                rb.linearVelocity = new Vector2(rb.linearVelocity.x, waterJumpForce);
 
                 if (animator != null)
-                    animator.SetTrigger("Jump"); //
+                    animator.SetTrigger("Jump");
             }
-            else if (isGrounded) //
+            else if (isGrounded)
             {
-                rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce); //
+                rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
 
                 if (animator != null)
-                    animator.SetTrigger("Jump"); //
+                    animator.SetTrigger("Jump");
             }
         }
 
-        GestionarInputInvisibilidad(); //
-        GestionarInputDash(); //
-        GestionarInputDisparo(); //
-        RecuperarEspirituInvisible(); //
+        GestionarInputInvisibilidad();
+        GestionarInputDash();
+        GestionarInputDisparo();
+        RecuperarEspirituInvisible();
 
-        if (isInvisible && Time.time >= invisibilityEndTime) //
+        if (isInvisible && Time.time >= invisibilityEndTime)
         {
-            DesactivarInvisibilidad(); //
+            DesactivarInvisibilidad();
         }
 
-        if (!controlBloqueado && !isDashing && !isMovementLocked) //
+        if (!controlBloqueado && !isDashing && !isMovementLocked)
         {
             if (moveInput > 0 && !facingRight)
-                Flip(); //
+                Flip();
             else if (moveInput < 0 && facingRight)
-                Flip(); //
+                Flip();
         }
 
-        if (animator != null) //
+        if (animator != null)
         {
-            animator.SetFloat("Speed", isMovementLocked ? 0f : Mathf.Abs(moveInput)); //
-            animator.SetBool("IsGrounded", isGrounded); //
+            animator.SetFloat("Speed", isMovementLocked ? 0f : Mathf.Abs(moveInput));
+            animator.SetBool("IsGrounded", isGrounded);
         }
     }
 
     void GestionarInputDisparo()
     {
-        if (GameController.Instance == null) return; //
-        if (!GameController.Instance.DisparoDesbloqueado) return; //
-        if (controlBloqueado) return; //
-        if (isDashing) return; //
-        if (fireballPrefab == null) return; //
-        if (shootPoint == null) return; //
-        if (kitsuneSpirit == null) return; //
-        if (Time.time < nextShootTime) return; //
-        if (!Input.GetKeyDown(shootKey)) return; //
+        if (GameController.Instance == null) return;
+        if (!GameController.Instance.DisparoDesbloqueado) return;
+        if (controlBloqueado) return;
+        if (isDashing) return;
+        if (fireballPrefab == null) return;
+        if (shootPoint == null) return;
+        if (kitsuneSpirit == null) return;
+        if (Time.time < nextShootTime) return;
+        if (!Input.GetKeyDown(shootKey)) return;
 
-        if (!kitsuneSpirit.ConsumeSpirit(spiritCostPerShot)) //
+        if (!kitsuneSpirit.ConsumeSpirit(spiritCostPerShot))
         {
-            Debug.Log("Sin espíritu suficiente"); //
-            return; //
+            Debug.Log("Sin espíritu suficiente");
+            return;
         }
 
-        if (animator != null) animator.SetTrigger("Shoot"); //
+        if (animator != null) animator.SetTrigger("Shoot");
 
-        nextShootTime = Time.time + shootCooldown; //
+        nextShootTime = Time.time + shootCooldown;
 
-        Vector2 direccionDisparo = facingRight ? Vector2.right : Vector2.left; //
+        Vector2 direccionDisparo = facingRight ? Vector2.right : Vector2.left;
 
-        float vertical = 0f; //
-        if (Input.GetKey(KeyCode.W)) vertical = 1f; //
-        if (Input.GetKey(KeyCode.S)) vertical = -1f; //
+        float vertical = 0f;
+        if (Input.GetKey(KeyCode.W)) vertical = 1f;
+        if (Input.GetKey(KeyCode.S)) vertical = -1f;
 
-        float horizontal = 0f; //
-        if (Input.GetKey(KeyCode.D)) horizontal = 1f; //
-        if (Input.GetKey(KeyCode.A)) horizontal = -1f; //
+        float horizontal = 0f;
+        if (Input.GetKey(KeyCode.D)) horizontal = 1f;
+        if (Input.GetKey(KeyCode.A)) horizontal = -1f;
 
-        if (vertical != 0f) //
+        if (vertical != 0f)
         {
             if (horizontal != 0f)
-                direccionDisparo = new Vector2(horizontal, vertical).normalized; //
+                direccionDisparo = new Vector2(horizontal, vertical).normalized;
             else
-                direccionDisparo = new Vector2(0f, vertical); //
+                direccionDisparo = new Vector2(0f, vertical);
         }
-        else if (isMovementLocked && horizontal != 0f) //
+        else if (isMovementLocked && horizontal != 0f)
         {
-            direccionDisparo = new Vector2(horizontal, 0f); //
+            direccionDisparo = new Vector2(horizontal, 0f);
         }
 
-        GameObject fireball = Instantiate(fireballPrefab, shootPoint.position, Quaternion.identity); //
-        Fireball fireballScript = fireball.GetComponent<Fireball>(); //
+        GameObject fireball = Instantiate(fireballPrefab, shootPoint.position, Quaternion.identity);
+        Fireball fireballScript = fireball.GetComponent<Fireball>();
 
         if (fireballScript != null)
         {
-            fireballScript.SetDirection(direccionDisparo); //
+            fireballScript.SetDirection(direccionDisparo);
         }
 
-        Debug.Log("Disparo realizado en dirección: " + direccionDisparo); //
+        Debug.Log("Disparo realizado en dirección: " + direccionDisparo);
     }
 
     void RecuperarEspirituInvisible()
     {
-        if (!isInvisible) return; //
-        if (kitsuneSpirit == null) return; //
-        if (Time.time < nextSpiritRecoveryTime) return; //
+        if (!isInvisible) return;
+        if (kitsuneSpirit == null) return;
+        if (Time.time < nextSpiritRecoveryTime) return;
 
-        nextSpiritRecoveryTime = Time.time + spiritRecoveryInterval; //
-        kitsuneSpirit.AddSpirit(spiritRecoveryAmount); //
+        nextSpiritRecoveryTime = Time.time + spiritRecoveryInterval;
+        kitsuneSpirit.AddSpirit(spiritRecoveryAmount);
     }
 
     void FixedUpdate()
     {
-        if (controlBloqueado || isDashing) return; //
+        if (controlBloqueado || isDashing) return;
 
-        float currentSpeed = isInWater ? waterMoveSpeed : moveSpeed; //
-        Vector2 velocity = rb.linearVelocity; //
+        float currentSpeed = isInWater ? waterMoveSpeed : moveSpeed;
+        Vector2 velocity = rb.linearVelocity;
 
-        velocity.x = isMovementLocked ? 0f : moveInput * currentSpeed; //
+        velocity.x = isMovementLocked ? 0f : moveInput * currentSpeed;
 
         if (isInWater && velocity.y < maxFallSpeedInWater)
-            velocity.y = maxFallSpeedInWater; //
+            velocity.y = maxFallSpeedInWater;
 
-        rb.linearVelocity = velocity; //
+        rb.linearVelocity = velocity;
     }
 
     void GestionarInputInvisibilidad()
     {
-        if (GameController.Instance == null) return; //
-        if (!GameController.Instance.InvisibilidadDesbloqueada) return; //
-        if (!Input.GetKeyDown(teclaInvisibilidad)) return; //
-        if (isDashing) return; //
+        if (GameController.Instance == null) return;
+        if (!GameController.Instance.InvisibilidadDesbloqueada) return;
+        if (!Input.GetKeyDown(teclaInvisibilidad)) return;
+        if (isDashing) return;
 
         if (isInvisible)
         {
-            DesactivarInvisibilidad(); //
-            return; //
+            DesactivarInvisibilidad();
+            return;
         }
 
-        if (invisibilityOnCooldown) return; //
+        if (invisibilityOnCooldown) return;
 
-        ActivarInvisibilidad(); //
+        ActivarInvisibilidad();
     }
 
     void ActivarInvisibilidad()
     {
-        isInvisible = true; //
-        invisibilityEndTime = Time.time + duracionMaximaInvisibilidad; //
-        nextSpiritRecoveryTime = Time.time + spiritRecoveryInterval; //
+        isInvisible = true;
+        invisibilityEndTime = Time.time + duracionMaximaInvisibilidad;
+        nextSpiritRecoveryTime = Time.time + spiritRecoveryInterval;
 
-        AplicarTransparencia(alphaInvisible); //
-        IgnorarColisionConTengus(true); //
+        AplicarTransparencia(alphaInvisible);
+        IgnorarColisionConTengus(true);
 
-        Debug.Log("Kitsune invisible ACTIVADO"); //
+        Debug.Log("Kitsune invisible ACTIVADO");
     }
 
     void DesactivarInvisibilidad()
     {
-        if (!isInvisible) return; //
+        if (!isInvisible) return;
 
-        isInvisible = false; //
+        isInvisible = false;
 
-        if (!isDashing) IgnorarColisionConTengus(false); //
+        if (!isDashing) IgnorarColisionConTengus(false);
 
-        AplicarTransparencia(1f); //
-        StartCoroutine(CooldownInvisibilidadRutina()); //
+        AplicarTransparencia(1f);
+        StartCoroutine(CooldownInvisibilidadRutina());
 
-        Debug.Log("Kitsune invisible DESACTIVADO"); //
+        Debug.Log("Kitsune invisible DESACTIVADO");
     }
 
     IEnumerator CooldownInvisibilidadRutina()
     {
-        invisibilityOnCooldown = true; //
-        yield return new WaitForSeconds(cooldownInvisibilidad); //
-        invisibilityOnCooldown = false; //
-        Debug.Log("Cooldown de invisibilidad terminado"); //
+        invisibilityOnCooldown = true;
+        yield return new WaitForSeconds(cooldownInvisibilidad);
+        invisibilityOnCooldown = false;
+        Debug.Log("Cooldown de invisibilidad terminado");
     }
 
     void GestionarInputDash()
     {
-        if (GameController.Instance == null) return; //
-        if (!GameController.Instance.DashDesbloqueado) return; //
-        if (isDashing || dashOnCooldown || controlBloqueado || isMovementLocked) return; //
+        if (GameController.Instance == null) return;
+        if (!GameController.Instance.DashDesbloqueado) return;
+        if (isDashing || dashOnCooldown || controlBloqueado || isMovementLocked) return;
 
         if (Input.GetKeyDown(KeyCode.A))
         {
             if (Time.time - lastTapLeftTime <= doubleTapWindow)
             {
-                IniciarDash(-1); //
-                return; //
+                IniciarDash(-1);
+                return;
             }
-            lastTapLeftTime = Time.time; //
+            lastTapLeftTime = Time.time;
         }
 
         if (Input.GetKeyDown(KeyCode.D))
         {
             if (Time.time - lastTapRightTime <= doubleTapWindow)
             {
-                IniciarDash(1); //
-                return; //
+                IniciarDash(1);
+                return;
             }
-            lastTapRightTime = Time.time; //
+            lastTapRightTime = Time.time;
         }
     }
 
     void IniciarDash(int direction)
     {
-        if (isDashing || dashOnCooldown) return; //
-        StartCoroutine(DashRutina(direction)); //
+        if (isDashing || dashOnCooldown) return;
+        StartCoroutine(DashRutina(direction));
     }
 
     IEnumerator DashRutina(int direction)
     {
-        isDashing = true; //
-        dashOnCooldown = true; //
-        dashDirection = direction; //
-        dashDamageApplied = false; //
-        ghostDashDamageApplied = false; //
-        controlBloqueado = true; //
+        isDashing = true;
+        dashOnCooldown = true;
+        dashDirection = direction;
+        dashDamageApplied = false;
+        ghostDashDamageApplied = false;
+        controlBloqueado = true;
 
-        if (direction > 0 && !facingRight) Flip(); //
-        else if (direction < 0 && facingRight) Flip(); //
+        if (direction > 0 && !facingRight) Flip();
+        else if (direction < 0 && facingRight) Flip();
 
-        if (invulnerableDuringDash) IgnorarColisionConTengus(true); //
+        if (invulnerableDuringDash) IgnorarColisionConTengus(true);
 
-        rb.gravityScale = 0f; //
-        float tiempo = 0f; //
+        rb.gravityScale = 0f;
+        float tiempo = 0f;
 
         while (tiempo < dashDuration)
         {
-            tiempo += Time.deltaTime; //
-            rb.linearVelocity = new Vector2(direction * dashSpeed, 0f); //
+            tiempo += Time.deltaTime;
+            rb.linearVelocity = new Vector2(direction * dashSpeed, 0f);
 
-            IntentarDanarTenguConDash(direction); //
-            IntentarDanarFantasmaConDash(); //
+            IntentarDanarTenguConDash(direction);
+            IntentarDanarFantasmaConDash();
 
-            yield return null; //
+            yield return null;
         }
 
-        rb.gravityScale = isInWater ? waterGravityScale : normalGravityScale; //
-        rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y); //
+        rb.gravityScale = isInWater ? waterGravityScale : normalGravityScale;
+        rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
 
-        if (invulnerableDuringDash && !isInvisible) IgnorarColisionConTengus(false); //
+        if (invulnerableDuringDash && !isInvisible) IgnorarColisionConTengus(false);
 
-        isDashing = false; //
-        controlBloqueado = false; //
+        isDashing = false;
+        controlBloqueado = false;
 
-        yield return new WaitForSeconds(dashCooldown); //
-        dashOnCooldown = false; //
+        yield return new WaitForSeconds(dashCooldown);
+        dashOnCooldown = false;
     }
 
     void IntentarDanarTenguConDash(int direction)
     {
-        if (!isDashing) return; //
-        if (dashDamageApplied) return; //
+        if (!isDashing) return;
+        if (dashDamageApplied) return;
 
-        GameObject[] tengus = GameObject.FindGameObjectsWithTag("Enemy"); //
+        GameObject[] tengus = GameObject.FindGameObjectsWithTag("Enemy");
 
         foreach (GameObject tengu in tengus)
         {
-            if (tengu == null) continue; //
+            if (tengu == null) continue;
 
-            TenguState tenguState = tengu.GetComponent<TenguState>(); //
-            if (tenguState == null || tenguState.IsDead) continue; //
+            TenguState tenguState = tengu.GetComponent<TenguState>();
+            if (tenguState == null || tenguState.IsDead) continue;
 
-            float distancia = Vector2.Distance(transform.position, tengu.transform.position); //
-            if (distancia > dashHitRange) continue; //
+            float distancia = Vector2.Distance(transform.position, tengu.transform.position);
+            if (distancia > dashHitRange) continue;
 
-            TenguAI tenguAI = tengu.GetComponent<TenguAI>(); //
-            bool tenguMiraDerecha = true; //
+            TenguAI tenguAI = tengu.GetComponent<TenguAI>();
+            bool tenguMiraDerecha = true;
 
             if (tenguAI != null && tenguAI.Graphics != null)
-                tenguMiraDerecha = tenguAI.Graphics.localScale.x > 0f; //
+                tenguMiraDerecha = tenguAI.Graphics.localScale.x > 0f;
 
-            bool golpePorEspalda; //
+            bool golpePorEspalda;
 
             if (tenguMiraDerecha)
-                golpePorEspalda = transform.position.x < tengu.transform.position.x; //
+                golpePorEspalda = transform.position.x < tengu.transform.position.x;
             else
-                golpePorEspalda = transform.position.x > tengu.transform.position.x; //
+                golpePorEspalda = transform.position.x > tengu.transform.position.x;
 
             bool dashVaHaciaElTengu =
                 (direction == 1 && transform.position.x <= tengu.transform.position.x + 0.5f) ||
-                (direction == -1 && transform.position.x >= tengu.transform.position.x - 0.5f); //
+                (direction == -1 && transform.position.x >= tengu.transform.position.x - 0.5f);
 
             if (golpePorEspalda && dashVaHaciaElTengu)
             {
-                tenguState.TakeHit(1); //
-                dashDamageApplied = true; //
-                Debug.Log("¡Dash por retaguardia conectado al Tengu!"); //
-                return; //
+                tenguState.TakeHit(1);
+                dashDamageApplied = true;
+                Debug.Log("¡Dash por retaguardia conectado al Tengu!");
+                return;
             }
         }
     }
 
     void IntentarDanarFantasmaConDash()
     {
-        if (!isDashing || ghostDashDamageApplied) return; //
+        if (!isDashing || ghostDashDamageApplied) return;
 
-        ZoneBossGhostAI[] fantasmas = Object.FindObjectsByType<ZoneBossGhostAI>(FindObjectsSortMode.None); //
+        ZoneBossGhostAI[] fantasmas = Object.FindObjectsByType<ZoneBossGhostAI>(FindObjectsSortMode.None);
         foreach (ZoneBossGhostAI ghost in fantasmas)
         {
-            if (ghost == null) continue; //
+            if (ghost == null) continue;
 
-            GhostHealth health = ghost.GetComponent<GhostHealth>(); //
-            if (health == null || health.IsDead) continue; //
+            GhostHealth health = ghost.GetComponent<GhostHealth>();
+            if (health == null || health.IsDead) continue;
 
-            float distancia = Vector2.Distance(transform.position, ghost.transform.position); //
+            float distancia = Vector2.Distance(transform.position, ghost.transform.position);
 
             if (distancia <= dashHitRange)
             {
-                health.TakeHit(1); //
-                ghostDashDamageApplied = true; //
-                Debug.Log("💥 [DASH] Ataque de emergencia conectado con éxito a una sola fantasma."); //
-                return; //
+                health.TakeHit(1);
+                ghostDashDamageApplied = true;
+                Debug.Log("💥 [DASH] Ataque de emergencia conectado con éxito a una sola fantasma.");
+                return;
             }
         }
     }
 
     void AplicarTransparencia(float alpha)
     {
-        if (spriteRenderers == null) return; //
+        if (spriteRenderers == null) return;
 
         foreach (SpriteRenderer sr in spriteRenderers)
         {
-            if (sr == null) continue; //
+            if (sr == null) continue;
 
-            Color c = sr.color; //
-            c.a = alpha; //
-            sr.color = c; //
+            Color c = sr.color;
+            c.a = alpha;
+            sr.color = c;
         }
     }
 
     void IgnorarColisionConTengus(bool ignorar)
     {
-        GameObject[] tengus = GameObject.FindGameObjectsWithTag("Enemy"); //
+        GameObject[] tengus = GameObject.FindGameObjectsWithTag("Enemy");
 
         foreach (GameObject tengu in tengus)
         {
-            Collider2D[] tenguColliders = tengu.GetComponentsInChildren<Collider2D>(); //
+            Collider2D[] tenguColliders = tengu.GetComponentsInChildren<Collider2D>();
 
             foreach (Collider2D playerCol in playerColliders)
             {
-                if (playerCol == null) continue; //
+                if (playerCol == null) continue;
 
                 foreach (Collider2D tenguCol in tenguColliders)
                 {
-                    if (tenguCol == null) continue; //
-                    Physics2D.IgnoreCollision(playerCol, tenguCol, ignorar); //
+                    if (tenguCol == null) continue;
+                    Physics2D.IgnoreCollision(playerCol, tenguCol, ignorar);
                 }
             }
         }
@@ -474,68 +472,68 @@ public class KitsuneController : MonoBehaviour, IInvisibilityProvider
 
     void Flip()
     {
-        facingRight = !facingRight; //
+        facingRight = !facingRight;
 
-        Vector3 localScale = transform.localScale; //
-        localScale.x *= -1; //
-        transform.localScale = localScale; //
+        Vector3 localScale = transform.localScale;
+        localScale.x *= -1;
+        transform.localScale = localScale;
     }
 
     public void EnterWater()
     {
-        isInWater = true; //
-        rb.gravityScale = waterGravityScale; //
+        isInWater = true;
+        rb.gravityScale = waterGravityScale;
     }
 
     public void ExitWater()
     {
-        isInWater = false; //
-        rb.gravityScale = normalGravityScale; //
+        isInWater = false;
+        rb.gravityScale = normalGravityScale;
     }
 
     public bool IsInWater()
     {
-        return isInWater; //
+        return isInWater;
     }
 
     public void AplicarKnockback(Vector2 fuerza, float duracionBloqueo)
     {
-        StartCoroutine(KnockbackRutina(fuerza, duracionBloqueo)); //
+        StartCoroutine(KnockbackRutina(fuerza, duracionBloqueo));
     }
 
     private IEnumerator KnockbackRutina(Vector2 fuerza, float duracionBloqueo)
     {
-        controlBloqueado = true; //
-        rb.linearVelocity = fuerza; //
+        controlBloqueado = true;
+        rb.linearVelocity = fuerza;
 
-        yield return new WaitForSeconds(duracionBloqueo); //
+        yield return new WaitForSeconds(duracionBloqueo);
 
-        controlBloqueado = false; //
+        controlBloqueado = false;
     }
 
     private void OnDrawGizmosSelected()
     {
-        if (groundCheck == null) return; //
+        if (groundCheck == null) return;
 
-        Gizmos.color = Color.yellow; //
-        Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius); //
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
 
-        Gizmos.color = Color.cyan; //
-        Gizmos.DrawWireSphere(transform.position, dashHitRange); //
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawWireSphere(transform.position, dashHitRange);
     }
 
     public void BloquearControles()
     {
-        controlBloqueado = true; //
+        controlBloqueado = true;
 
         if (rb != null)
         {
-            rb.linearVelocity = Vector2.zero; //
+            rb.linearVelocity = Vector2.zero;
         }
     }
 
     public void DesbloquearControles()
     {
-        controlBloqueado = false; //
+        controlBloqueado = false;
     }
 }

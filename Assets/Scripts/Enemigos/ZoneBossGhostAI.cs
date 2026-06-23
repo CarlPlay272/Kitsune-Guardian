@@ -19,25 +19,27 @@ public class ZoneBossGhostAI : MonoBehaviour
     [Header("Movimiento Base")]
     [SerializeField] private float floatSpeed = 2.5f;
     [SerializeField] private float floatMagnitude = 0.25f;
-    [SerializeField] private float movementSpeed = 3.5f;    // SUBIDO: De 3f a 3.5f para que te persigan más rápido
+    [SerializeField] private float movementSpeed = 3.5f;
 
     [Header("Configuración General de Ataque")]
     [SerializeField] private float attackDamage = 15f;
 
     [Header("Configuración Tipo Melee (Dash Esquivable)")]
-    [SerializeField] private float radioAlertaDash = 4.5f;   // SUBIDO: Te detecta un pelo antes para iniciar la embestida
-    [SerializeField] private float velocidadDash = 18f;      // SUBIDO: De 16f a 18f ¡Ahora se lanza a toda hostia![cite: 1]
-    [SerializeField] private float duracionDash = 0.4f;      // AJUSTADO: Menos duración porque va más rápido, manteniendo la distancia[cite: 1]
+    [SerializeField] private float radioAlertaDash = 4.5f;
+    [SerializeField] private float velocidadDash = 18f;
+    [SerializeField] private float duracionDash = 0.4f;
     [SerializeField] private float tiempoExhausta = 1.8f;
-    [Tooltip("El radio del golpe circular. Subido para alcanzar al jugador desde más lejos.")]
-    [SerializeField] private float radioRafagaAtaque = 3.2f; // SUBIDO: De 2.5f a 3.2f para que te pegue desde más lejos aunque lo esquives[cite: 1]
+    [SerializeField] private float radioRafagaAtaque = 3.2f;
 
-    [Header("Configuración Tipo Tiradora")]
+    [Header("Configuración Tipo Tiradora (Inteligente)")]
     [SerializeField] private GameObject bulletPrefab;
     [SerializeField] private float radioFrenadoTiro = 6.5f;
-    [SerializeField] private float cooldownDisparo = 1.8f;    // AJUSTADO: Dispara un pelo más rápido para meter más presión[cite: 1]
-    [Tooltip("Ajusta qué tan arriba apunta la bala para compensar el pivote bajo del Kitsune.")]
+    [SerializeField] private float cooldownDisparo = 1.8f;
     [SerializeField] private float offsetAlturaMiras = 0.8f;
+    [Tooltip("Distancia vertical fija que mantendrá por encima del jugador.")]
+    [SerializeField] private float alturaDeseadaSobrePlayer = 3.5f;
+    [Tooltip("Si el jugador se acerca a menos de esta distancia horizontal, la tiradora retrocederá.")]
+    [SerializeField] private float radioRetiradaEvasiva = 4.0f;
 
     private EstadoGhost estadoActual = EstadoGhost.Retornando;
     private KitsuneController playerController;
@@ -101,7 +103,11 @@ public class ZoneBossGhostAI : MonoBehaviour
 
         if (ghostHealth != null && !ghostHealth.IsDead)
         {
-            if (animator != null) animator.SetBool("IsChasing", true);
+            if (animator != null)
+            {
+                animator.ResetTrigger("Hurt");
+                animator.SetBool("IsChasing", true);
+            }
             estadoActual = EstadoGhost.BuscandoAlZorro;
         }
     }
@@ -153,10 +159,10 @@ public class ZoneBossGhostAI : MonoBehaviour
         if (estadoActual == EstadoGhost.BuscandoAlZorro && playerTransform != null)
         {
             AplicarOrientacion(playerTransform.position.x);
-            float distanciaAlPlayer = Vector2.Distance(transform.position, playerTransform.position);
 
             if (tipoDeFantasma == TipoEnemigo.MeleeConDash)
             {
+                float distanciaAlPlayer = Vector2.Distance(transform.position, playerTransform.position);
                 posicionDestino = Vector2.MoveTowards(rb.position, playerTransform.position, movementSpeed * Time.fixedDeltaTime);
 
                 if (distanciaAlPlayer <= radioAlertaDash && !ejecutandoRutinaAtaque)
@@ -166,9 +172,34 @@ public class ZoneBossGhostAI : MonoBehaviour
             }
             else if (tipoDeFantasma == TipoEnemigo.TiradoraEstatica)
             {
-                if (distanciaAlPlayer > radioFrenadoTiro)
+                // 🔥 LÓGICA DE TIRADORA AVANZADA
+                // 1. Calcular la posición ideal manteniendo siempre el "High Ground" sobre el Kitsune
+                Vector2 objetivoFlotante = new Vector2(playerTransform.position.x, playerTransform.position.y + alturaDeseadaSobrePlayer);
+
+                float distanciaHorizontal = Mathf.Abs(rb.position.x - playerTransform.position.x);
+                float distanciaReal = Vector2.Distance(rb.position, playerTransform.position);
+
+                // 2. Comportamiento Evasivo (Kiteo): Si el Kitsune se acerca demasiado, retroceder horizontalmente
+                if (distanciaHorizontal < radioRetiradaEvasiva)
                 {
-                    posicionDestino = Vector2.MoveTowards(rb.position, playerTransform.position, movementSpeed * Time.fixedDeltaTime);
+                    // Determinar hacia dónde huir (en dirección opuesta al jugador)
+                    float direccionHuidaX = (rb.position.x > playerTransform.position.x) ? 1f : -1f;
+
+                    // Su nuevo objetivo horizontal será alejarse un rango seguro, manteniendo la altura fija
+                    objetivoFlotante = new Vector2(playerTransform.position.x + (direccionHuidaX * radioFrenadoTiro), playerTransform.position.y + alturaDeseadaSobrePlayer);
+                    posicionDestino = Vector2.MoveTowards(rb.position, objetivoFlotante, movementSpeed * Time.fixedDeltaTime);
+                }
+                // 3. Persecución a distancia: Si el jugador está muy lejos, se acerca horizontalmente pero SIN bajar de nivel
+                else if (distanciaReal > radioFrenadoTiro)
+                {
+                    posicionDestino = Vector2.MoveTowards(rb.position, objetivoFlotante, movementSpeed * Time.fixedDeltaTime);
+                }
+                // 4. Mantener la altura si está en rango óptimo de tiro
+                else
+                {
+                    // Si ya está en la distancia correcta, solo corrige su altura para no caer al suelo
+                    Vector2 soloAltura = new Vector2(rb.position.x, playerTransform.position.y + alturaDeseadaSobrePlayer);
+                    posicionDestino = Vector2.MoveTowards(rb.position, soloAltura, movementSpeed * Time.fixedDeltaTime);
                 }
             }
         }
@@ -182,6 +213,7 @@ public class ZoneBossGhostAI : MonoBehaviour
             posicionDestino = rb.position;
         }
 
+        // Aplicar el suave flote místico sinusoidal en el eje Y
         posicionDestino.y += offsetSin * Time.fixedDeltaTime;
         rb.MovePosition(posicionDestino);
     }
@@ -204,7 +236,6 @@ public class ZoneBossGhostAI : MonoBehaviour
             yield return null;
         }
 
-        // HITBOX EXTENDIDO: Escanea un área mucho mayor (3.2m) para conectar golpes lejanos de forma implacable[cite: 1]
         Collider2D[] objetosImpactados = Physics2D.OverlapCircleAll(transform.position, radioRafagaAtaque);
         foreach (Collider2D col in objetosImpactados)
         {
@@ -265,6 +296,13 @@ public class ZoneBossGhostAI : MonoBehaviour
     void SincronizarAnimator()
     {
         if (animator == null) return;
+
+        if (estadoActual == EstadoGhost.RecibiendoDano)
+        {
+            animator.SetBool("IsChasing", false);
+            return;
+        }
+
         bool moviendo = estadoActual == EstadoGhost.BuscandoAlZorro || estadoActual == EstadoGhost.Retornando;
         animator.SetBool("IsChasing", moviendo);
     }
@@ -276,7 +314,6 @@ public class ZoneBossGhostAI : MonoBehaviour
             Gizmos.color = Color.red;
             Gizmos.DrawWireSphere(transform.position, radioAlertaDash);
 
-            // Círculo Amarillo: Muestra visualmente el nuevo rango gigante del golpe[cite: 1]
             Gizmos.color = Color.yellow;
             Gizmos.DrawWireSphere(transform.position, radioRafagaAtaque);
         }
@@ -284,6 +321,10 @@ public class ZoneBossGhostAI : MonoBehaviour
         {
             Gizmos.color = Color.magenta;
             Gizmos.DrawWireSphere(transform.position, radioFrenadoTiro);
+
+            // Gizmo Celeste: Para ver en el editor el rango donde la tiradora empezará a huir
+            Gizmos.color = Color.cyan;
+            Gizmos.DrawWireSphere(transform.position, radioRetiradaEvasiva);
         }
     }
 }

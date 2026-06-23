@@ -1,10 +1,10 @@
-using UnityEngine;
+锘縰sing UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
 public class GhostBullet : MonoBehaviour
 {
-    [Header("Configuraci髇")]
-    [SerializeField] private float speed = 4f; // Velocidad lenta como pediste
+    [Header("Configuraci贸n")]
+    [SerializeField] private float speed = 4f;
     [SerializeField] private float lifeTime = 5f;
     [SerializeField] private float damage = 10f;
 
@@ -18,25 +18,32 @@ public class GhostBullet : MonoBehaviour
 
     public void InicializarDireccion(Vector3 targetPos)
     {
-        // Calcula la direcci髇 matem醫ica pura hacia el punto del Kitsune
         direccionMover = (targetPos - transform.position).normalized;
-
-        // Destrucci髇 autom醫ica si no golpea nada
         Destroy(gameObject, lifeTime);
     }
 
     void FixedUpdate()
     {
-        // Desplazamiento cinem醫ico directo constante
         rb.MovePosition(rb.position + direccionMover * speed * Time.fixedDeltaTime);
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        // Si choca con el Kitsune, le aplica el da駉 directo de vida
+        // 1. Verificar si el objeto con el que chocamos es el jugador
         KitsuneHealth playerHealth = other.GetComponent<KitsuneHealth>() ?? other.GetComponentInParent<KitsuneHealth>();
+
         if (playerHealth != null && !playerHealth.IsDead)
         {
+            // 馃敟 PARCHE M脥STICO: Buscamos el controlador para verificar si Carlos activ贸 la invisibilidad
+            KitsuneController playerController = other.GetComponent<KitsuneController>() ?? other.GetComponentInParent<KitsuneController>();
+
+            if (playerController != null && playerController.IsInvisible)
+            {
+                Debug.Log("馃敭 [INVISIBILIDAD] La bala fantasma pas贸 de largo a trav茅s del Kitsune.");
+                return; // Corta la ejecuci贸n: la bala no hace da帽o y sigue su camino de largo
+            }
+
+            // Si no est谩 invisible, se aplica el comportamiento normal de da帽o
             playerHealth.TakeDamage(damage);
             Destroy(gameObject);
         }
