@@ -318,12 +318,20 @@ public class GameController : MonoBehaviour
             contenedorCorrupcion.SetActive(false); //
     }
 
+    // 🔥 MODIFICADO: Sistema blindado de activación de la plataforma de salto del pozo
     public void ActivarPlataformaSalto()
     {
-        if (plataformaSaltoActiva) return; //
-        plataformaSaltoActiva = true; //
-        if (humosSalto != null) humosSalto.SetActive(true); //
-        if (jumpPadTrigger != null) jumpPadTrigger.SetActive(true); //
+        plataformaSaltoActiva = true;
+
+        // Si las referencias directas están vacías por carga de escena, las busca por nombre de forma nativa
+        if (humosSalto == null) humosSalto = GameObject.Find("HumosSalto");
+        if (jumpPadTrigger == null) jumpPadTrigger = GameObject.Find("JumpPadTrigger");
+
+        // Forza el encendido de los componentes de impulso físico en el mapa
+        if (humosSalto != null) humosSalto.SetActive(true);
+        if (jumpPadTrigger != null) jumpPadTrigger.SetActive(true);
+
+        Debug.Log("🚀 [SISTEMA] ¡Plataforma de salto activada de forma forzada con éxito!");
     }
 
     public void ObtenerLlaveAzul()
@@ -344,22 +352,22 @@ public class GameController : MonoBehaviour
         {
             gameOverPanel.SetActive(true); //
 
-            CanvasGroup cg = gameOverPanel.GetComponent<CanvasGroup>();
-            if (cg == null) cg = gameOverPanel.AddComponent<CanvasGroup>();
+            CanvasGroup cg = gameOverPanel.GetComponent<CanvasGroup>(); //
+            if (cg == null) cg = gameOverPanel.AddComponent<CanvasGroup>(); //
 
-            StartCoroutine(FadeInPanelRoutine(cg));
+            StartCoroutine(FadeInPanelRoutine(cg)); //
         }
     }
 
     private IEnumerator FadeInPanelRoutine(CanvasGroup cg)
     {
-        cg.alpha = 0f;
-        while (cg.alpha < 1f)
+        cg.alpha = 0f; //
+        while (cg.alpha < 1f) //
         {
-            cg.alpha += Time.deltaTime * 2.5f;
-            yield return null;
+            cg.alpha += Time.deltaTime * 2.5f; //
+            yield return null; //
         }
-        cg.alpha = 1f;
+        cg.alpha = 1f; //
     }
 
     // ===============================================================
@@ -372,7 +380,7 @@ public class GameController : MonoBehaviour
         cachedHealth = -1f; //
         cachedSpirit = -1f; //
 
-        if (gameOverPanel != null) gameOverPanel.SetActive(false);
+        if (gameOverPanel != null) gameOverPanel.SetActive(false); //
 
         string nombreEscenaActual = SceneManager.GetActiveScene().name; //
         SceneManager.LoadScene(nombreEscenaActual); //
@@ -382,13 +390,13 @@ public class GameController : MonoBehaviour
     {
         vieneDeNivelAnterior = false; //
 
-        if (gameOverPanel != null) gameOverPanel.SetActive(false);
-        SceneManager.sceneLoaded -= OnSceneLoaded;
+        if (gameOverPanel != null) gameOverPanel.SetActive(false); //
+        SceneManager.sceneLoaded -= OnSceneLoaded; //
 
         Destroy(gameObject); //
 
-        // 🔥 CORREGIDO: Cambiado de "MenuPrincipal" a "MainMenu" para calzar exacto con tus Build Profiles
-        SceneManager.LoadScene("MainMenu");
+        // Cambiado de "MenuPrincipal" a "MainMenu" para calzar exacto con tus Build Profiles
+        SceneManager.LoadScene("MainMenu"); //
     }
 
     public void ModificarVidasDebug(int cantidad) //
