@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using TMPro;
 using UnityEngine;
 
@@ -8,7 +8,7 @@ public class IntroduccionInicio : MonoBehaviour
     [TextArea(2, 5)]
     [SerializeField] private string[] mensajes;
 
-    [Header("Configuraci�n")]
+    [Header("Configuración")]
     [SerializeField] private float tiempoVisible = 3f;
     [SerializeField] private float velocidadFade = 2f;
 
@@ -16,6 +16,8 @@ public class IntroduccionInicio : MonoBehaviour
     [SerializeField] private TextMeshPro textMeshPro;
 
     private bool activado = false;
+
+    public bool EstaReproduciendose { get; private set; } = false;
 
     private void Start()
     {
@@ -37,8 +39,7 @@ public class IntroduccionInicio : MonoBehaviour
         if (activado)
             return;
 
-        KitsuneHealth kitsune =
-            other.GetComponentInParent<KitsuneHealth>();
+        KitsuneHealth kitsune = other.GetComponentInParent<KitsuneHealth>();
 
         if (kitsune == null)
             return;
@@ -48,19 +49,21 @@ public class IntroduccionInicio : MonoBehaviour
 
         activado = true;
 
-        KitsuneController controller =
-            kitsune.GetComponent<KitsuneController>();
+        KitsuneController controller = kitsune.GetComponent<KitsuneController>();
 
-        StartCoroutine(
-            IntroRutina(controller)
-        );
+        StartCoroutine(IntroRutina(controller));
     }
 
-    private IEnumerator IntroRutina(
-        KitsuneController controller
-    )
+    private IEnumerator IntroRutina(KitsuneController controller)
     {
-        if (controller != null)
+        EstaReproduciendose = true;
+
+        // 🔥 MODIFICADO: Informar de inmediato al cerebro central para amarrar los controles[cite: 7]
+        if (GameController.Instance != null)
+        {
+            GameController.Instance.SetBloqueoHistoria(true);
+        }
+        else if (controller != null)
         {
             controller.BloquearControles();
         }
@@ -71,44 +74,39 @@ public class IntroduccionInicio : MonoBehaviour
 
             yield return Fade(0f, 1f);
 
-            yield return new WaitForSeconds(
-                tiempoVisible
-            );
+            yield return new WaitForSeconds(tiempoVisible);
 
             yield return Fade(1f, 0f);
 
-            yield return new WaitForSeconds(
-                0.5f
-            );
+            yield return new WaitForSeconds(0.5f);
         }
 
-        if (controller != null)
+        // 🔥 MODIFICADO: Liberar el candado global al finalizar toda la rutina de texto[cite: 7]
+        if (GameController.Instance != null)
+        {
+            GameController.Instance.SetBloqueoHistoria(false);
+        }
+        else if (controller != null)
         {
             controller.DesbloquearControles();
         }
 
+        EstaReproduciendose = false;
+
         Destroy(gameObject);
     }
 
-    private IEnumerator Fade(
-        float alphaInicial,
-        float alphaFinal
-    )
+    private IEnumerator Fade(float alphaInicial, float alphaFinal)
     {
         float tiempo = 0f;
 
         while (tiempo < 1f)
         {
-            tiempo += Time.deltaTime *
-                velocidadFade;
+            tiempo += Time.deltaTime * velocidadFade;
 
             Color c = textMeshPro.color;
 
-            c.a = Mathf.Lerp(
-                alphaInicial,
-                alphaFinal,
-                tiempo
-            );
+            c.a = Mathf.Lerp(alphaInicial, alphaFinal, tiempo);
 
             textMeshPro.color = c;
 

@@ -7,13 +7,13 @@ public class PauseMenuController : MonoBehaviour
     public static PauseMenuController Instance;
 
     [Header("Paneles de la Interfaz")]
-    [SerializeField] private GameObject pauseMenuPanel;    // El objeto 'PanelPausa'
-    [SerializeField] private GameObject bordeMisticoFondo; // La caja 'BordeMisticoFondo'
-    [SerializeField] private GameObject controlesPanel;    // La pestaña 'PanelControlesBeta'
-    [SerializeField] private GameObject loadingPanel;      // El panel de carga
+    [SerializeField] private GameObject pauseMenuPanel;
+    [SerializeField] private GameObject bordeMisticoFondo;
+    [SerializeField] private GameObject controlesPanel;
+    [SerializeField] private GameObject loadingPanel;
 
     private bool isPaused = false;
-    private bool bloqueadoPorDialogo = false; // Candado para los textos de la historia
+    private bool bloqueadoPorDialogo = false;
     private AudioSource musicaFondo;
 
     public bool IsPaused => isPaused;
@@ -38,7 +38,6 @@ public class PauseMenuController : MonoBehaviour
 
     void Start()
     {
-        // Forzar escaneo en la primera escena activa
         BuscarReferenciasPaneles();
         AsegurarEstadosPaneles(false);
         if (loadingPanel != null) loadingPanel.SetActive(false);
@@ -48,7 +47,6 @@ public class PauseMenuController : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            // Evitar conflictos si el panel de carga está activo
             if (loadingPanel != null && loadingPanel.activeSelf) return;
 
             if (isPaused)
@@ -60,7 +58,6 @@ public class PauseMenuController : MonoBehaviour
 
     private void BuscarReferenciasPaneles()
     {
-        // 🔥 SOLUCIÓN BLINDADA: Escanea todos los Canvas de la escena para encontrar el HUD, sin importar su jerarquía
         Canvas[] todosLosCanvas = Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None);
         GameObject hudObj = null;
 
@@ -75,7 +72,6 @@ public class PauseMenuController : MonoBehaviour
 
         if (hudObj != null)
         {
-            // transform.Find encuentra los subpaneles aunque estén ocultos o anidados
             Transform panelPausaTransform = hudObj.transform.Find("PanelPausa");
             if (panelPausaTransform != null)
             {
@@ -98,13 +94,9 @@ public class PauseMenuController : MonoBehaviour
         AsegurarEstadosPaneles(false);
         if (loadingPanel != null) loadingPanel.SetActive(false);
 
-        // Resetear estados lógicos al cambiar de mapa
         isPaused = false;
         bloqueadoPorDialogo = false;
 
-        // ===============================================================
-        // REVINCULACIÓN AUTOMÁTICA DE TODOS LOS BOTONES DE LA ESCENA
-        // ===============================================================
         GameObject botonObj = GameObject.Find("BotonPausaUI");
         if (botonObj != null)
         {
@@ -138,24 +130,21 @@ public class PauseMenuController : MonoBehaviour
         }
     }
 
-    // ===============================================================
-    // LÓGICA CORE DE PAUSA
-    // ===============================================================
     public void PausarJuego()
     {
-        if (isPaused) return; // Antispam: Evita que se congele doble si se presiona muy rápido
+        if (isPaused) return;
 
-        BuscarReferenciasPaneles(); // Asegurar escaneo fresco antes de abrir
+        BuscarReferenciasPaneles();
         if (pauseMenuPanel == null) return;
 
         isPaused = true;
 
-        // Escaneo dinámico forzado en el microsegundo exacto de la pausa
+        // Validar si hay un texto corriendo de verdad para congelar logs[cite: 5]
         IntroduccionInicio introActiva = Object.FindFirstObjectByType<IntroduccionInicio>();
-        if (introActiva != null)
+        if (introActiva != null && introActiva.EstaReproduciendose)
         {
             bloqueadoPorDialogo = true;
-            Debug.Log("💬 [HISTORIA] Texto de Naya detectado al pausar por primera vez. Controles protegidos.");
+            Debug.Log("💬 [HISTORIA] Pausa activada en medio de una cinemática de texto.");
         }
         else
         {
@@ -168,30 +157,33 @@ public class PauseMenuController : MonoBehaviour
 
         Time.timeScale = 0f;
         PausarMusicaEscena(true);
-        BloquearKitsune(true); // Congelar inputs del Kitsune de pana
+        BloquearKitsune(true);
     }
 
     public void ContinuarJuego()
     {
-        if (!isPaused) return; // Antispam
+        if (!isPaused) return;
 
         isPaused = false;
         AsegurarEstadosPaneles(false);
         Time.timeScale = 1f;
         PausarMusicaEscena(false);
 
-        // APLICACIÓN DEL CANDADO INTELIGENTE
-        if (bloqueadoPorDialogo)
+        // 🔥 MODIFICACIÓN COMPLETA: Preguntar al cerebro si la historia mantiene los controles amarrados[cite: 5, 7]
+        if (GameController.Instance != null && GameController.Instance.ControlesBloqueadosPorHistoria)
         {
-            Debug.Log("💬 [HISTORIA] Menú cerrado. El Kitsune permanece inmóvil hasta terminar de leer.");
+            // Forzar el bloqueo físico: el jugador NO se moverá aunque se despause[cite: 5, 7]
+            BloquearKitsune(true);
+            Debug.Log("🛡️ [HIERRO] Menú cerrado en medio de historia. Controles retenidos por GameController.");
         }
         else
         {
-            // Gameplay normal: Se mueve de inmediato
+            // Gameplay normal: se devuelven los inputs con normalidad[cite: 5]
             BloquearKitsune(false);
+            Debug.Log("🎮 [GAMEPLAY] Menú cerrado de forma normal. Inputs liberados.");
         }
 
-        bloqueadoPorDialogo = false; // Reset de seguridad
+        bloqueadoPorDialogo = false;
     }
 
     private void AsegurarEstadosPaneles(bool estado)
@@ -210,14 +202,12 @@ public class PauseMenuController : MonoBehaviour
 
         Debug.Log("🔄 [REINICIO] Solicitando carga asíncrona mística al LoadingManager para el Nivel_1.");
 
-        // 🔥 MODIFICACIÓN: Conexión con el nuevo flujo de carga asíncrona con desvanecido
         if (LoadingManager.Instance != null)
         {
             LoadingManager.Instance.CambiarEscenaMistica("Nivel_1");
         }
         else
         {
-            // Respaldo por si se prueba la interfaz de forma aislada
             SceneManager.LoadScene("Nivel_1");
         }
     }
@@ -245,10 +235,10 @@ public class PauseMenuController : MonoBehaviour
 
     private void BloquearKitsune(bool bloquear)
     {
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-        if (player != null)
+        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+        if (playerObj != null)
         {
-            KitsuneController controller = player.GetComponent<KitsuneController>();
+            KitsuneController controller = playerObj.GetComponent<KitsuneController>();
             if (controller != null)
             {
                 if (bloquear) controller.BloquearControles();
