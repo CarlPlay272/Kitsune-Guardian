@@ -12,6 +12,7 @@ public class OniBoss : MonoBehaviour, IDamageable
 
     [Header("Referencias")]
     [SerializeField] private Transform player;
+    [SerializeField] private GameEndScreen gameEndScreen;
     [SerializeField] private Animator animator;
     [SerializeField] private Collider2D damageCollider;
     [SerializeField] private BossHealthBar healthBar;
@@ -36,11 +37,14 @@ public class OniBoss : MonoBehaviour, IDamageable
     [SerializeField] private float attackCooldownPhase1 = 3f;
     [SerializeField] private float attackCooldownPhase2 = 1.8f;
     [SerializeField] private float summonCooldownPhase1 = 12f;
-    [SerializeField] private float summonCooldownPhase2 = 18f; // Súper nerfeado a 18 segundos
+    [SerializeField] private float summonCooldownPhase2 = 18f;
 
     [Header("Eventos")]
     [SerializeField] private UnityEvent onBossDeath;
     [SerializeField] private UnityEvent onCombatStart;
+
+    // FIX: mainCamera y camSpeed eliminados — la cámara la maneja
+    // exclusivamente OniIntroCinematicController. OniBoss no toca la cámara.
 
     private BossState currentState = BossState.Idle;
     private BossPhase currentPhase = BossPhase.Phase1;
@@ -51,6 +55,9 @@ public class OniBoss : MonoBehaviour, IDamageable
 
     private List<GameObject> misTengusInvocados = new List<GameObject>();
     private bool yaInvoqueEnEsteCiclo = false;
+
+    // FIX: flag que indica si la cinemática externa ya terminó
+    private bool cinematicaDone = false;
 
     private void Awake()
     {
@@ -73,6 +80,7 @@ public class OniBoss : MonoBehaviour, IDamageable
         currentHealth = maxHealth;
         enemiesAlive = 0;
         yaInvoqueEnEsteCiclo = false;
+        cinematicaDone = false;
         misTengusInvocados.Clear();
         currentState = BossState.Idle;
 
@@ -85,14 +93,29 @@ public class OniBoss : MonoBehaviour, IDamageable
 
         onCombatStart?.Invoke();
 
+        // FIX: NO lanzar OniIntroCinematic() desde aquí.
+        // La cinemática la maneja OniIntroCinematicController.
+        // Cuando termina, llama NotifyCinematicDone() y recién ahí arranca el combate.
+
         if (combatLoopRoutine != null)
             StopCoroutine(combatLoopRoutine);
 
         combatLoopRoutine = StartCoroutine(CombatLoop());
     }
 
+    // FIX: OniIntroCinematicController llama esto al final de su secuencia,
+    // en lugar de llamar StartCombat(). Así el CombatLoop espera la señal.
+    public void NotifyCinematicDone()
+    {
+        cinematicaDone = true;
+    }
+
     private IEnumerator CombatLoop()
     {
+        // FIX: esperar a que OniIntroCinematicController termine su cinemática
+        // antes de hacer cualquier cosa de combate
+        yield return new WaitUntil(() => cinematicaDone);
+
         yield return StartCoroutine(SummonTengus());
         float lastSummonTime = Time.time;
 
@@ -119,7 +142,6 @@ public class OniBoss : MonoBehaviour, IDamageable
 
             bool canSummon = (Time.time - lastSummonTime >= summonCooldown) && !yaInvoqueEnEsteCiclo;
 
-            // Solo 15% de probabilidad para que sea súper jugable
             if (canSummon && Random.value < 0.15f)
             {
                 lastSummonTime = Time.time;
@@ -189,17 +211,11 @@ public class OniBoss : MonoBehaviour, IDamageable
         int attack = Random.Range(0, attackRangeMax);
 
         if (attack == 0)
-        {
             yield return StartCoroutine(AttackCorruptBurst());
-        }
         else if (attack == 1)
-        {
             yield return StartCoroutine(AttackVoidMark());
-        }
         else
-        {
             yield return StartCoroutine(AttackBossWave());
-        }
 
         currentState = BossState.Idle;
     }
@@ -233,9 +249,7 @@ public class OniBoss : MonoBehaviour, IDamageable
             var script = orb.GetComponent<BossHomingOrb>();
             var invProvider = player.GetComponent<IInvisibilityProvider>();
             if (script != null)
-            {
                 script.Initialize(player, invProvider);
-            }
         }
         yield return new WaitForSeconds(0.5f);
     }
@@ -245,7 +259,11 @@ public class OniBoss : MonoBehaviour, IDamageable
         Transform origin = projectileSpawnPoint != null ? projectileSpawnPoint : transform;
         if (waveAttackPrefab != null)
         {
-            Instantiate(waveAttackPrefab, new Vector3(origin.position.x, origin.position.y - 1.8f, origin.position.z), Quaternion.identity);
+            Instantiate(
+                waveAttackPrefab,
+                new Vector3(origin.position.x, origin.position.y - 1.8f, origin.position.z),
+                Quaternion.identity
+            );
         }
         yield return new WaitForSeconds(0.8f);
     }
@@ -263,9 +281,7 @@ public class OniBoss : MonoBehaviour, IDamageable
         currentHealth = Mathf.Max(0, currentHealth - amount);
 
         if (BossOniHUDController.Instance != null)
-        {
             BossOniHUDController.Instance.ActualizarVidaOni((float)currentHealth / maxHealth);
-        }
 
         if (currentHealth <= 0) Die();
     }
@@ -274,17 +290,31 @@ public class OniBoss : MonoBehaviour, IDamageable
     {
         currentState = BossState.Dead;
         combatActive = false;
-        StopAllCoroutines();
+        StopAllCoroutines(); // para el combate
 
         if (BossOniHUDController.Instance != null)
-        {
             BossOniHUDController.Instance.CambiarEstadoPresenciaJugador(false);
-        }
 
         if (damageCollider != null) damageCollider.enabled = false;
         animator?.SetTrigger("Dead");
         onBossDeath?.Invoke();
 
-        Destroy(gameObject, 1.5f); // Desaparece rápido en 1.5s
+        // FIX: GameEndScreen maneja su propio delay con WaitForSecondsRealtime.
+        // No usar coroutine aquí porque StopAllCoroutines() ya fue llamado arriba.
+        if (gameEndScreen != null)
+            gameEndScreen.ShowEndScreen();
+        else
+            Debug.LogWarning("⚠️ GameEndScreen no asignado en OniBoss");
+
+        Destroy(gameObject, 1.5f);
     }
+
+    public bool TieneTengusActivos()
+    {
+        return enemiesAlive > 0 || QuedanMisTengusVivos();
+    }
+    // FIX: OniIntroCinematic y MoveCameraTo eliminados de OniBoss.
+    // La cámara la controla exclusivamente OniIntroCinematicController.
+    // Tener dos scripts moviendo mainCamera.transform.position en paralelo
+    // era la causa del "rebote" de cámara.
 }
