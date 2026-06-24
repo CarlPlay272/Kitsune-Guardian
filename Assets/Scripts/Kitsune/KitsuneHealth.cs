@@ -57,6 +57,12 @@ public class KitsuneHealth : MonoBehaviour, IDamageable
 
         kitsuneController = GetComponent<KitsuneController>();
 
+        // 🔥 FIJACIÓN DE HIERRO: Forzamos el orden de las teclas en el inicio del juego
+        // Esto ignora lo que esté mal guardado en el Inspector de los Niveles 1, 2 o 3.
+        toggleDisparoKey = KeyCode.U;
+        toggleDashKey = KeyCode.I;
+        toggleInvisibilidadKey = KeyCode.O;
+
         Debug.Log("KitsuneHealth cargado. Vida inicial: " + currentHealth);
     }
 
@@ -74,7 +80,6 @@ public class KitsuneHealth : MonoBehaviour, IDamageable
             {
                 GameController.Instance.ModificarVidasDebug(-1);
 
-                // 🔥 PARCHE TRUCO CORAZONES EN CERO: Si las vidas caen a 0 usando el truco, gatillar el GameOver de inmediato
                 if (GameController.Instance.VidasActuales <= 0)
                 {
                     StartCoroutine(RespawnRoutine());
@@ -110,6 +115,7 @@ public class KitsuneHealth : MonoBehaviour, IDamageable
                 }
             }
 
+            // 🔥 COMPROBADO: Activa de forma exclusiva el Disparo (U)
             if (Input.GetKeyDown(toggleDisparoKey) && GameController.Instance != null)
             {
                 bool nuevoEstado = !GameController.Instance.DisparoDesbloqueado;
@@ -117,6 +123,7 @@ public class KitsuneHealth : MonoBehaviour, IDamageable
                 Debug.Log("🔥 [DEBUG] Habilidad de Disparo establecida en: " + nuevoEstado);
             }
 
+            // 🔥 COMPROBADO: Activa de forma exclusiva el Dash (I)
             if (Input.GetKeyDown(toggleDashKey) && GameController.Instance != null)
             {
                 bool nuevoEstado = !GameController.Instance.DashDesbloqueado;
@@ -124,6 +131,7 @@ public class KitsuneHealth : MonoBehaviour, IDamageable
                 Debug.Log("💨 [DEBUG] Habilidad de Dash establecida en: " + nuevoEstado);
             }
 
+            // 🔥 COMPROBADO: Activa de forma exclusiva la Invisibilidad (O)
             if (Input.GetKeyDown(toggleInvisibilidadKey) && GameController.Instance != null)
             {
                 bool nuevoEstado = !GameController.Instance.InvisibilidadDesbloqueada;
@@ -218,7 +226,6 @@ public class KitsuneHealth : MonoBehaviour, IDamageable
         isDead = true;
         temporizadorR = 0f;
 
-        // 🔥 MODIFICADO: Solo restamos vida si no venimos de un truco que ya las dejó en cero
         if (GameController.Instance != null && GameController.Instance.VidasActuales > 0)
         {
             GameController.Instance.RestarVida(1);

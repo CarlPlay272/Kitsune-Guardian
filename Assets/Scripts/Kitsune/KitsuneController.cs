@@ -46,8 +46,8 @@ public class KitsuneController : MonoBehaviour, IInvisibilityProvider
     [SerializeField] private float spiritCostPerShot = 1f;
 
     [Header("Recuperación Espíritu")]
-    [SerializeField] private float spiritRecoveryInterval = 5f;
-    [SerializeField] private float spiritRecoveryAmount = 2f;
+    [SerializeField] private float spiritRecoveryInterval = 0.15f;
+    [SerializeField] private float spiritRecoveryAmount = 5f;
 
     private float nextShootTime = 0f;
     private float nextSpiritRecoveryTime = 0f;
@@ -221,10 +221,21 @@ public class KitsuneController : MonoBehaviour, IInvisibilityProvider
     {
         if (!isInvisible) return;
         if (kitsuneSpirit == null) return;
+        if (isDashing) return;
+
         if (Time.time < nextSpiritRecoveryTime) return;
 
         nextSpiritRecoveryTime = Time.time + spiritRecoveryInterval;
-        kitsuneSpirit.AddSpirit(spiritRecoveryAmount);
+
+        if (kitsuneSpirit.MaxSpirit < 300f)
+        {
+            kitsuneSpirit.SetMaxSpirit(300f);
+        }
+
+        // Inyección directa blindada
+        kitsuneSpirit.CurrentSpirit += spiritRecoveryAmount;
+
+        Debug.Log("🔮 [INVISIBILIDAD] Absorbiendo ráfagas de energía: " + kitsuneSpirit.CurrentSpirit + "/" + kitsuneSpirit.MaxSpirit);
     }
 
     void FixedUpdate()
@@ -264,7 +275,7 @@ public class KitsuneController : MonoBehaviour, IInvisibilityProvider
     {
         isInvisible = true;
         invisibilityEndTime = Time.time + duracionMaximaInvisibilidad;
-        nextSpiritRecoveryTime = Time.time + spiritRecoveryInterval;
+        nextSpiritRecoveryTime = Time.time;
 
         AplicarTransparencia(alphaInvisible);
         IgnorarColisionConTengus(true);

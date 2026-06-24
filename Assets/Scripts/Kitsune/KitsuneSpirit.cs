@@ -1,10 +1,10 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class KitsuneSpirit : MonoBehaviour
 {
-    [Header("Esp�ritu")]
-    [SerializeField] private float maxSpirit = 100f;
-    [SerializeField] private float currentSpirit = 50f;
+    [Header("Espíritu")]
+    [SerializeField] private float maxSpirit = 300f; // 🔥 CAPACIDAD GIGANTE DE BASE
+    [SerializeField] private float currentSpirit = 150f;
 
     public float MaxSpirit => maxSpirit;
 
@@ -23,6 +23,13 @@ public class KitsuneSpirit : MonoBehaviour
 
             return currentSpirit / maxSpirit;
         }
+    }
+
+    // 🔥 NUEVO: Forzar al despertar que la capacidad máxima sea siempre 300f
+    private void Awake()
+    {
+        maxSpirit = 300f;
+        currentSpirit = Mathf.Clamp(currentSpirit, 0f, maxSpirit);
     }
 
     public bool HasSpirit(float amount)

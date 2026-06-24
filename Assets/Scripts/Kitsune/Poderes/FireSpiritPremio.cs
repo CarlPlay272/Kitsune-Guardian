@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using UnityEngine;
 
 public class FireSpiritPremio : MonoBehaviour
@@ -10,12 +10,15 @@ public class FireSpiritPremio : MonoBehaviour
     [Header("Premio")]
     [SerializeField] private int puntos = 1;
     [SerializeField] private float curacionAlRecolectar = 25f;
-    [SerializeField] private float energiaOtorgada = 3f;
-    [Header("Efecto de recolección")]
+
+    // ðŸ”¥ MODIFICADO: Ahora otorga 30f de espÃ­ritu por recolectar (30 rÃ¡fagas de fuego consecutivas)
+    [SerializeField] private float energiaOtorgada = 30f;
+
+    [Header("Efecto de recolecciÃ³n")]
     [SerializeField] private float duracionEfecto = 0.5f;
     [SerializeField] private float alturaSubida = 0.5f;
 
-    [Header("Flotación")]
+    [Header("FlotaciÃ³n")]
     [SerializeField] private float flotacionAmplitud = 0.15f;
     [SerializeField] private float flotacionVelocidad = 2f;
 
@@ -26,7 +29,6 @@ public class FireSpiritPremio : MonoBehaviour
     private Collider2D colliderPremio;
 
     private bool recolectado = false;
-
     private Vector3 posicionInicial;
     private Vector3 posicionInicialGraphics;
 
@@ -80,8 +82,7 @@ public class FireSpiritPremio : MonoBehaviour
         if (recolectado)
             return;
 
-        KitsuneHealth kitsune =
-            other.GetComponentInParent<KitsuneHealth>();
+        KitsuneHealth kitsune = other.GetComponentInParent<KitsuneHealth>();
 
         if (kitsune == null)
             return;
@@ -96,46 +97,37 @@ public class FireSpiritPremio : MonoBehaviour
     {
         recolectado = true;
 
-        Debug.Log("Espíritu de fuego recolectado.");
+        Debug.Log("EspÃ­ritu de fuego recolectado.");
 
-        // Puntos
         if (GameController.Instance != null)
         {
             GameController.Instance.SumarPunto(puntos);
         }
 
-        // Curación
         if (curacionAlRecolectar > 0f)
         {
             kitsune.Heal(curacionAlRecolectar);
         }
 
-        // Energía espiritual
-        KitsuneSpirit spirit =
-            kitsune.GetComponent<KitsuneSpirit>();
+        KitsuneSpirit spirit = kitsune.GetComponent<KitsuneSpirit>();
 
         if (spirit != null)
         {
             spirit.AddSpirit(energiaOtorgada);
 
             Debug.Log(
-                "Espíritu actual: " +
+                "EspÃ­ritu actual: " +
                 spirit.CurrentSpirit +
                 "/" +
                 spirit.MaxSpirit
             );
         }
 
-        // Sonido
-        if (sonidoRecoleccion != null &&
-            audioSource != null)
+        if (sonidoRecoleccion != null && audioSource != null)
         {
-            audioSource.PlayOneShot(
-                sonidoRecoleccion
-            );
+            audioSource.PlayOneShot(sonidoRecoleccion);
         }
 
-        // Desactivar colisión
         if (colliderPremio != null)
         {
             colliderPremio.enabled = false;
@@ -165,8 +157,7 @@ public class FireSpiritPremio : MonoBehaviour
 
             float t = tiempo / duracionEfecto;
 
-            graphics.localPosition =
-                Vector3.Lerp(inicio, fin, t);
+            graphics.localPosition = Vector3.Lerp(inicio, fin, t);
 
             Color color = colorInicial;
             color.a = Mathf.Lerp(1f, 0f, t);
